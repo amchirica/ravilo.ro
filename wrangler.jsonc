@@ -7,6 +7,11 @@
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "keep_vars": true,
   "minify": true,
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "ravilo.ro", "custom_domain": true }
+  ],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
@@ -19,10 +24,5 @@
   ],
   "images": {
     "binding": "IMAGES"
-  },
-  "alias": {
-    "next/dist/compiled/@vercel/og": "./cloudflare/og-stub.js",
-    "next/dist/compiled/@vercel/og/index.edge.js": "./cloudflare/og-stub.js",
-    "next/dist/compiled/@vercel/og/index.node.js": "./cloudflare/og-stub.js"
   }
 }
