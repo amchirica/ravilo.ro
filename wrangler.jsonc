@@ -1,11 +1,12 @@
 {
-  // Workers Builds can keep Build = `npm run build` and Deploy = `npx wrangler deploy`.
-  // `npm run build` runs OpenNext; wrangler then calls `opennextjs-cloudflare deploy`.
+  // Workers Builds: Build = `npm run build`, Deploy = `npx wrangler deploy`.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ravilo-ro",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-08-31",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "keep_vars": true,
+  "minify": true,
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
@@ -18,5 +19,10 @@
   ],
   "images": {
     "binding": "IMAGES"
+  },
+  "alias": {
+    "next/dist/compiled/@vercel/og": "./cloudflare/og-stub.js",
+    "next/dist/compiled/@vercel/og/index.edge.js": "./cloudflare/og-stub.js",
+    "next/dist/compiled/@vercel/og/index.node.js": "./cloudflare/og-stub.js"
   }
 }

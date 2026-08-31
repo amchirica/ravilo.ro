@@ -1,10 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
-import createIntlMiddleware from "next-intl/middleware";
-import { routing } from "@/i18n/routing";
+import { applyLocaleRouting } from "@/lib/intl-proxy";
 import { safeInternalPath } from "@/lib/redirect";
 import { copyResponseCookies, createMiddlewareSupabase, isPublicAdminPath } from "@/lib/supabase/middleware";
-
-const intlMiddleware = createIntlMiddleware(routing);
 
 function withoutLocale(pathname: string) {
   if (pathname === "/en" || pathname.startsWith("/en/")) {
@@ -63,7 +60,7 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  const intlResponse = intlMiddleware(request);
+  const intlResponse = applyLocaleRouting(request);
   const { user, response } = await sessionUser(request, requestHeaders, intlResponse, "shop");
   const prefix = pathname.startsWith("/en") ? "/en" : "";
 

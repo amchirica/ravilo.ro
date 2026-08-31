@@ -39,6 +39,13 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "50mb",
     },
   },
+  outputFileTracingExcludes: {
+    "*": [
+      "node_modules/next/dist/compiled/@vercel/og/**",
+      "node_modules/postgres/**",
+      "**/*.map",
+    ],
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
