@@ -28,7 +28,7 @@ export function BrandLogo({
       width={width}
       height={height}
       className={cn(
-        "w-auto object-contain object-left",
+        "max-h-full max-w-full w-auto object-contain object-left",
         invert === true && "invert",
         invert === "dark" && "dark:invert",
       )}
@@ -37,7 +37,7 @@ export function BrandLogo({
       fetchPriority={priority ? "high" : "auto"}
     />
   );
-  const classes = cn("inline-flex shrink-0 items-center", className);
+  const classes = cn("inline-flex min-w-0 items-center", className);
   if (href.startsWith("/admin")) {
     return (
       <NextLink href={href} prefetch={false} className={classes} aria-label="RAVILO">

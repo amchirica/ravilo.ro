@@ -3,11 +3,16 @@ import { test, expect } from "@playwright/test";
 test("mobile menu covers the page and shows links", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
+  const header = page.locator("header").first();
+  await expect(header.getByRole("button", { name: "RO" })).toHaveCount(0);
+  await expect(header.getByLabel(/Temă|Theme/i)).toHaveCount(0);
   await page.getByRole("button", { name: /Deschide meniul|Open menu/i }).click();
   const menu = page.getByRole("dialog", { name: /Deschide meniul|Open menu/i });
   await expect(menu).toBeVisible();
   await expect(menu.getByRole("link", { name: /Produse|Products/i })).toBeVisible();
   await expect(menu.getByRole("link", { name: /Noutăți|New arrivals/i })).toBeVisible();
+  await expect(menu.getByRole("link", { name: /Cont|Account/i })).toBeVisible();
+  await expect(menu.getByRole("button", { name: "RO" })).toBeVisible();
 });
 
 test("RO homepage renders brand", async ({ page }) => {

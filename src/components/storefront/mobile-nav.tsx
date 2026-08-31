@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Menu, X } from "lucide-react";
 import { IconButton } from "@/components/ui/primitives";
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 type NavItem = { id: string; url: string; label: string };
 
@@ -59,6 +61,22 @@ export function MobileNav({ items, label }: { items: NavItem[]; label: string })
                 </li>
               ))}
             </ul>
+            <div className="shrink-0 border-t border-line px-6 py-5">
+              <div className="grid gap-1 text-sm">
+                <Link prefetch={false} href="/cont" className="py-2.5 text-ink/80" onClick={() => setOpen(false)}>
+                  {t("account")}
+                </Link>
+                <Link prefetch={false} href="/favorite" className="py-2.5 text-ink/80" onClick={() => setOpen(false)}>
+                  {t("wishlist")}
+                </Link>
+              </div>
+              <div className="mt-4 flex items-center justify-between">
+                <Suspense>
+                  <LanguageSwitcher />
+                </Suspense>
+                <ThemeToggle />
+              </div>
+            </div>
           </nav>,
           document.body,
         )

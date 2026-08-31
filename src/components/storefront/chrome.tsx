@@ -59,24 +59,26 @@ export async function StoreHeader() {
   const iconClass = "inline-flex h-11 w-11 items-center justify-center text-ink/75 transition-colors hover:text-ink";
   return (
     <StickyHeader announcement={announcementBar}>
-      <Container className="relative flex h-[var(--header-h)] items-center justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-1">
+      <Container className="relative flex h-[var(--header-h)] items-center justify-between gap-2 sm:gap-4">
+        <div className="flex min-w-0 items-center gap-0.5">
           <MobileNav items={navItems} label={t("openMenu")} />
-          <BrandLogo href="/" height={32} priority />
+          <BrandLogo href="/" height={32} className="max-w-[8.5rem] sm:max-w-none" priority />
         </div>
         <HeaderNav items={navItems} categories={categories} productsLabel={t("products")} />
-        <div className="flex items-center">
-          <Suspense>
-            <LanguageSwitcher />
-          </Suspense>
-          <ThemeToggle />
+        <div className="flex shrink-0 items-center">
+          <div className="hidden items-center lg:flex">
+            <Suspense>
+              <LanguageSwitcher />
+            </Suspense>
+            <ThemeToggle />
+          </div>
           <Suspense>
             <HeaderSearch />
           </Suspense>
-          <Link prefetch={false} href="/cont" aria-label={t("account")} className={iconClass}>
+          <Link prefetch={false} href="/cont" aria-label={t("account")} className={`hidden lg:inline-flex ${iconClass}`}>
             <User size={18} strokeWidth={1.5} />
           </Link>
-          <Link prefetch={false} href="/favorite" aria-label={t("wishlist")} className={iconClass}>
+          <Link prefetch={false} href="/favorite" aria-label={t("wishlist")} className={`hidden lg:inline-flex ${iconClass}`}>
             <Heart size={18} strokeWidth={1.5} />
           </Link>
           <Link prefetch={false} href="/cos" aria-label={t("cart")} className={iconClass}>
