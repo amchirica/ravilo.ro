@@ -1,5 +1,15 @@
 import { test, expect } from "@playwright/test";
 
+test("mobile menu covers the page and shows links", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await page.getByRole("button", { name: /Deschide meniul|Open menu/i }).click();
+  const menu = page.getByRole("dialog", { name: /Deschide meniul|Open menu/i });
+  await expect(menu).toBeVisible();
+  await expect(menu.getByRole("link", { name: /Produse|Products/i })).toBeVisible();
+  await expect(menu.getByRole("link", { name: /Noutăți|New arrivals/i })).toBeVisible();
+});
+
 test("RO homepage renders brand", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("link", { name: "RAVILO" }).first()).toBeVisible();

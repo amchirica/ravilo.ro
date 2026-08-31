@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { withLocalePrefix } from "@/lib/locale-path";
@@ -18,14 +19,23 @@ export function HeaderSearch() {
   const action = withLocalePrefix("/cautare", locale);
   const [q, setQ] = useState("");
   const [overlay, setOverlay] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [hits, setHits] = useState<Groups | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const ready = q.trim().length >= 2;
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (!overlay) return;
+    document.body.style.overflow = "hidden";
     inputRef.current?.focus();
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [overlay]);
 
   useEffect(() => {
@@ -71,8 +81,9 @@ export function HeaderSearch() {
       <IconButton type="button" aria-label={t("title")} onClick={() => setOverlay(true)}>
         <Search size={18} strokeWidth={1.5} />
       </IconButton>
-      {overlay ? (
-        <div className="fixed inset-0 z-50 bg-paper" role="dialog" aria-modal="true" aria-label={t("title")}>
+      {overlay && mounted
+        ? createPortal(
+        <div className="fixed inset-0 z-[80] h-dvh overflow-y-auto bg-paper" role="dialog" aria-modal="true" aria-label={t("title")}>
           <div className="mx-auto flex min-h-full max-w-3xl flex-col px-4 py-8 sm:px-6">
             <div className="flex items-center justify-between">
               <p className="eyebrow">{t("title")}</p>
@@ -123,8 +134,10 @@ export function HeaderSearch() {
                 : null}
             </div>
           </div>
-        </div>
-      ) : null}
+        </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }
