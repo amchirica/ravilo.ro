@@ -1,7 +1,6 @@
 {
-  // Workers Builds: set Build to `npx @opennextjs/cloudflare build`
-  // and Deploy to `npx @opennextjs/cloudflare deploy`.
-  // `npm run build` + `npx wrangler deploy` cannot deploy this Next.js app.
+  // Workers Builds can keep Build = `npm run build` and Deploy = `npx wrangler deploy`.
+  // `npm run build` runs OpenNext; wrangler then calls `opennextjs-cloudflare deploy`.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ravilo-ro",
   "main": ".open-next/worker.js",

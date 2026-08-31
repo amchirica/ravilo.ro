@@ -6,7 +6,8 @@
     "dev": "next dev",
     "dev:clean": "rimraf .next && next dev",
     "dev:webpack": "next dev --webpack",
-    "build": "next build",
+    "build": "opennextjs-cloudflare build",
+    "build:next": "next build",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "cf:build": "opennextjs-cloudflare build",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
@@ -46,6 +47,13 @@
     "stripe": "^22.6.0",
     "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3"
+  },
+  "allowScripts": {
+    "@parcel/watcher": true,
+    "@swc/core": true,
+    "esbuild": true,
+    "unrs-resolver": true,
+    "workerd": true
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
