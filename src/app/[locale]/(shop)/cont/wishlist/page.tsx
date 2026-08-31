@@ -9,7 +9,6 @@ import { AccountShell } from "@/components/storefront/account-shell";
 
 export default async function WishlistPage() {
   const t = await getTranslations("account");
-  const tSearch = await getTranslations("search");
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login?next=/cont/wishlist");
   const { data: items } = isSupabaseConfigured()
@@ -23,7 +22,7 @@ export default async function WishlistPage() {
       {products.length ? (
         <ProductGrid products={products} />
       ) : (
-        <EmptyState title={t("emptyWishlist")} actionHref="/produse" actionLabel={tSearch("discover")} />
+        <EmptyState title={t("emptyWishlist")} hint={t("emptyWishlistHint")} actionHref="/produse" actionLabel={t("browse")} />
       )}
     </AccountShell>
   );

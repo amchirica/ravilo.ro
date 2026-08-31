@@ -1,20 +1,29 @@
 import type { AppLocale } from "@/i18n/routing";
 
 const ORDER: Record<string, { ro: string; en: string }> = {
-  PENDING: { ro: "În așteptare", en: "Pending" },
-  CONFIRMED: { ro: "Confirmată", en: "Confirmed" },
-  PROCESSING: { ro: "În procesare", en: "Processing" },
-  FULFILLED: { ro: "Livrată", en: "Fulfilled" },
+  DRAFT: { ro: "Ciornă", en: "Draft" },
+  PENDING: { ro: "Comandă primită", en: "Order received" },
+  PENDING_PAYMENT: { ro: "Comandă primită", en: "Order received" },
+  CONFIRMED: { ro: "Plată confirmată", en: "Payment confirmed" },
+  PAID: { ro: "Plată confirmată", en: "Payment confirmed" },
+  PROCESSING: { ro: "În pregătire", en: "Preparing" },
+  READY_TO_SHIP: { ro: "În pregătire", en: "Preparing" },
+  SHIPPED: { ro: "Expediată", en: "Shipped" },
+  FULFILLED: { ro: "Livrată", en: "Delivered" },
+  DELIVERED: { ro: "Livrată", en: "Delivered" },
   CANCELLED: { ro: "Anulată", en: "Cancelled" },
   REFUNDED: { ro: "Rambursată", en: "Refunded" },
+  PARTIALLY_REFUNDED: { ro: "Rambursată parțial", en: "Partially refunded" },
 };
 
 const PAYMENT: Record<string, { ro: string; en: string }> = {
+  UNPAID: { ro: "Plată în așteptare", en: "Payment pending" },
   PENDING: { ro: "Plată în așteptare", en: "Payment pending" },
   AUTHORIZED: { ro: "Autorizată", en: "Authorized" },
-  PAID: { ro: "Plătită", en: "Paid" },
-  FAILED: { ro: "Eșuată", en: "Failed" },
+  PAID: { ro: "Plată confirmată", en: "Payment confirmed" },
+  FAILED: { ro: "Nefinalizată", en: "Not completed" },
   REFUNDED: { ro: "Rambursată", en: "Refunded" },
+  PARTIALLY_REFUNDED: { ro: "Rambursată parțial", en: "Partially refunded" },
   CANCELLED: { ro: "Anulată", en: "Cancelled" },
 };
 

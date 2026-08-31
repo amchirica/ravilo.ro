@@ -45,6 +45,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   setRequestLocale(localeParam);
   const locale = localeParam as AppLocale;
   const t = await getTranslations("product");
+  const tNav = await getTranslations("nav");
   const product = await getPublishedProductBySlug(slug, locale);
   if (!product) notFound();
   const related = product.category
@@ -177,9 +178,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <Button type="submit" className="w-full" disabled={product.stockStatus === "OUT"}>
                 {t("addToCart")}
               </Button>
-              <Button type="submit" formAction={buyNowAction} variant="line" className="w-full" disabled={product.stockStatus === "OUT"}>
+              <Button type="submit" formAction={buyNowAction} variant="secondary" className="w-full" disabled={product.stockStatus === "OUT"}>
                 {t("buyNow")}
               </Button>
+              <p className="text-xs leading-relaxed text-mute">{t("checkoutNote")}</p>
+              <p className="text-xs leading-relaxed text-mute">{t("shippingNote")}</p>
             </div>
             <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-paper px-4 py-3 lg:hidden" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
               <div className="mx-auto flex max-w-[1440px] items-center gap-3">
@@ -245,7 +248,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </div>
         </div>
       </div>
-      <FaqList items={faqs} title="FAQ" />
+      <FaqList items={faqs} title={tNav("faq")} />
       <section className="mt-20 md:mt-28">
         <SectionHeader title={t("reviews")} />
         {distribution.count > 0 ? (

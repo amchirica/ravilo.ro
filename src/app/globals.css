@@ -3,42 +3,50 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f6f5f1;
-  --foreground: #1a1a18;
-  --muted: #6f6d67;
-  --muted-foreground: #6f6d67;
-  --surface: #eeece7;
-  --surface-elevated: #fcfbf8;
-  --border: rgba(26, 26, 24, 0.08);
-  --accent: #2f332c;
-  --accent-hover: #1a1c18;
-  --accent-foreground: #f6f5f1;
+  --background: #f8f6f1;
+  --surface: #f1ede4;
+  --surface-soft: #f1ede4;
+  --surface-elevated: #ffffff;
+  --cream: #c8b79c;
+  --cream-hover: #b9a588;
+  --cream-dark: #9a876a;
+  --foreground: #1b1a18;
+  --muted: #706b63;
+  --muted-foreground: #706b63;
+  --border: rgba(27, 26, 24, 0.1);
+  --accent: #1b1a18;
+  --accent-hover: #302e29;
+  --accent-foreground: #ffffff;
   --danger: #8a3d3a;
   --success: #3d5c45;
-  --warning: #7a6550;
-  --band: #1a1a18;
-  --band-foreground: #f6f5f1;
+  --warning: #75644f;
+  --band: #201f1c;
+  --band-foreground: #f8f6f1;
   --radius: 0.5rem;
   --header-h: 4.25rem;
   color-scheme: light;
 }
 
 .dark {
-  --background: #121311;
-  --foreground: #f3f1eb;
-  --muted: #a8a59c;
-  --muted-foreground: #a8a59c;
-  --surface: #1b1c19;
-  --surface-elevated: #22241f;
-  --border: rgba(243, 241, 235, 0.1);
-  --accent: #c5c0b4;
-  --accent-hover: #ece8de;
-  --accent-foreground: #121311;
+  --background: #201f1c;
+  --surface: #2a2824;
+  --surface-soft: #2a2824;
+  --surface-elevated: #32302b;
+  --cream: #c8b79c;
+  --cream-hover: #d4c6b0;
+  --cream-dark: #9a876a;
+  --foreground: #f8f6f1;
+  --muted: #b7b1a8;
+  --muted-foreground: #b7b1a8;
+  --border: rgba(248, 246, 241, 0.12);
+  --accent: #c8b79c;
+  --accent-hover: #d4c6b0;
+  --accent-foreground: #1b1a18;
   --danger: #d98986;
   --success: #8fbf9a;
   --warning: #c4b08a;
-  --band: #0e0f0d;
-  --band-foreground: #f3f1eb;
+  --band: #161513;
+  --band-foreground: #f8f6f1;
   color-scheme: dark;
 }
 
@@ -47,7 +55,11 @@
   --color-ink: var(--foreground);
   --color-ink-2: var(--foreground);
   --color-surface: var(--surface);
+  --color-surface-soft: var(--surface-soft);
   --color-card: var(--surface-elevated);
+  --color-cream: var(--cream);
+  --color-cream-hover: var(--cream-hover);
+  --color-cream-dark: var(--cream-dark);
   --color-line: var(--border);
   --color-olive: var(--accent);
   --color-olive-dark: var(--accent-hover);
@@ -126,6 +138,12 @@ video.product-photo {
 .prose-ravilo {
   max-width: 42rem;
   line-height: 1.7;
+}
+
+.prose-ravilo img {
+  display: block;
+  max-width: 100%;
+  height: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -5,9 +5,9 @@ import { cn } from "@/lib/cn";
 const buttonVariants = {
   solid: "bg-ink text-paper hover:bg-olive-dark",
   primary: "bg-ink text-paper hover:bg-olive-dark",
-  line: "border border-line bg-transparent text-ink hover:border-ink",
-  secondary: "border border-line bg-transparent text-ink hover:border-ink",
-  ghost: "bg-transparent text-ink hover:bg-surface",
+  line: "border border-line bg-transparent text-ink hover:border-ink hover:bg-surface",
+  secondary: "bg-cream text-ink hover:bg-cream-hover",
+  ghost: "border border-line bg-transparent text-ink hover:bg-surface",
   text: "bg-transparent px-0 text-ink underline-offset-4 hover:underline",
   danger: "bg-danger text-paper hover:opacity-90",
 } as const;

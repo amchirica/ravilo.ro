@@ -18,8 +18,10 @@ export default async function SuccessPage({
     .maybeSingle();
   if (!order) notFound();
   return (
-    <Container className="max-w-xl py-20 text-center">
-      <ConfirmationPoll token={token} initialStatus={order.payment_status} orderNumber={order.public_order_number} />
-    </Container>
+    <section className="bg-surface">
+      <Container className="flex min-h-[70vh] max-w-xl items-center py-20">
+        <ConfirmationPoll token={token} initialStatus={order.payment_status} orderNumber={order.public_order_number} />
+      </Container>
+    </section>
   );
 }

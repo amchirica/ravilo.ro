@@ -24,15 +24,17 @@ export default async function CheckoutCancelledPage({
     }
   }
   return (
-    <Container className="max-w-xl py-20 text-center">
+    <section className="bg-surface">
+      <Container className="max-w-xl py-20 text-center">
       <h1 className="font-display text-4xl">{t("cancelledTitle")}</h1>
       <p className="mt-4 text-mute">{t("cancelledHint")}</p>
       <div className="mt-8 flex justify-center gap-3">
         <Button href="/checkout">{t("retry")}</Button>
-        <Button href="/produse" variant="line">
-          {t("continue")}
+        <Button href="/cos" variant="secondary">
+          {t("backToCart")}
         </Button>
       </div>
     </Container>
+    </section>
   );
 }

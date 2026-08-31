@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/primitives";
 import { ProductGrid } from "@/components/storefront/product-grid";
+import { EditorialHero } from "@/components/storefront/editorial-hero";
 import { JsonLd } from "@/components/seo/json-ld";
 import { getPublishedArticle } from "@/services/cms";
 import { getPublishedProductById } from "@/services/catalog";
@@ -19,7 +20,12 @@ export async function articleMetadata(slug: string, locale: AppLocale, kind: "AR
     title: article.seoTitle ?? article.title,
     description: article.seoDescription ?? article.excerpt,
     alternates: localeAlternates(path, locale, appUrl),
-    openGraph: { title: article.title, description: article.excerpt, type: "article" },
+    openGraph: {
+      title: article.title,
+      description: article.excerpt,
+      type: "article",
+      images: article.coverUrl ? [article.coverUrl] : undefined,
+    },
   };
 }
 
@@ -55,26 +61,37 @@ export async function ArticleView({ slug, locale, kind }: { slug: string; locale
       ],
     },
   ];
+  const ctaHref = article.ctaUrl?.trim();
   return (
-    <Container className="max-w-3xl py-16">
+    <article>
       <JsonLd data={jsonLd} />
-      <p className="text-xs uppercase tracking-[0.2em] text-mute">
-        <Link href="/">RAVILO</Link>
-        {" / "}
-        <Link href={kind === "GUIDE" ? "/ghiduri" : "/blog"}>{kindLabel}</Link>
-        {article.category ? ` / ${article.category}` : null}
-      </p>
-      <h1 className="mt-3 font-display text-[2.5rem] leading-[1.08] tracking-[-0.04em] md:text-5xl">{article.title}</h1>
-      <p className="mt-3 text-sm text-mute">{formatDate(article.publishedAt, locale)}</p>
-      <div className="prose-ravilo mt-8 space-y-4 text-lg leading-relaxed" dangerouslySetInnerHTML={{ __html: article.content }} />
-      {products.length ? (
-        <section className="mt-16">
-          <h2 className="font-display text-3xl tracking-[-0.03em]">{t("product.recommended")}</h2>
-          <div className="mt-6">
-            <ProductGrid products={products} />
-          </div>
-        </section>
-      ) : null}
-    </Container>
+      <EditorialHero
+        crumbs={
+          <p className="text-xs uppercase tracking-[0.2em] text-mute">
+            <Link href="/">RAVILO</Link>
+            {" / "}
+            <Link href={kind === "GUIDE" ? "/ghiduri" : "/blog"}>{kindLabel}</Link>
+            {article.category ? ` / ${article.category}` : null}
+          </p>
+        }
+        title={article.title}
+        description={article.excerpt}
+        meta={<p className="mt-3 text-sm text-mute">{formatDate(article.publishedAt, locale)}</p>}
+        image={article.coverUrl}
+        imageAlt={article.title}
+        cta={ctaHref ? { href: ctaHref, label: article.ctaLabel?.trim() || t("editorial.seeProducts") } : null}
+      />
+      <Container className="max-w-3xl pb-16">
+        <div className="prose-ravilo space-y-4 text-lg leading-relaxed" dangerouslySetInnerHTML={{ __html: article.content }} />
+        {products.length ? (
+          <section className="mt-16">
+            <h2 className="font-display text-3xl tracking-[-0.03em]">{t("product.recommended")}</h2>
+            <div className="mt-6">
+              <ProductGrid products={products} />
+            </div>
+          </section>
+        ) : null}
+      </Container>
+    </article>
   );
 }

@@ -42,12 +42,12 @@ function render(template: string, payload: EmailPayload, settings?: StoreSetting
   const brand = escapeHtml(settings?.siteName || settings?.storeName || "RAVILO");
   const wrap = (title: string, body: string, footer = "") => ({
     subject: `${brand} — ${title}`,
-    html: `<!doctype html><html><body style="font-family:Georgia,serif;background:#F4F2ED;color:#171817;padding:32px">
-      <div style="max-width:560px;margin:auto;background:#fff;padding:32px;border:1px solid #D8D4CB">
-        <p style="letter-spacing:.3em;font-size:12px">${brand}</p>
-        <h1 style="font-size:28px">${title}</h1>
-        <div style="line-height:1.6">${body}</div>
-        ${footer ? `<p style="margin-top:24px;font-size:12px;color:#6b6964">${footer}</p>` : ""}
+    html: `<!doctype html><html><body style="font-family:Georgia,serif;background:#F8F6F1;color:#1B1A18;padding:32px">
+      <div style="max-width:560px;margin:auto;background:#FFFFFF;padding:36px;border:1px solid rgba(27,26,24,0.10)">
+        <p style="letter-spacing:.28em;font-size:11px;color:#9A876A">${brand}</p>
+        <h1 style="font-size:28px;font-weight:400;letter-spacing:-0.03em">${title}</h1>
+        <div style="line-height:1.7;color:#706B63">${body}</div>
+        ${footer ? `<p style="margin-top:24px;font-size:13px;color:#9A876A">${footer}</p>` : `<p style="margin-top:28px;font-size:13px;color:#9A876A">Lucruri bune pentru viața de zi cu zi.</p>`}
       </div></body></html>`,
   });
   if (override?.subject || override?.heading || override?.body) {
@@ -64,22 +64,25 @@ function render(template: string, payload: EmailPayload, settings?: StoreSetting
       return wrap("Resetare parolă", `<p>Ai cerut resetarea parolei.</p><p><a href="${payload.url}">Setează o parolă nouă</a></p><p>Linkul expiră în 60 de minute.</p>`);
     case "order_received":
       return wrap(
-        "Comanda a fost înregistrată",
-        `<p>Comanda ${payload.orderNumber} așteaptă confirmarea plății.</p>
+        "Am primit comanda ta",
+        `<p>Comanda ${payload.orderNumber} a fost înregistrată. Îți scriem din nou după confirmarea plății.</p>
          ${payload.items ? `<p>${payload.items}</p>` : ""}
          ${payload.total ? `<p>Total: ${formatRon(Number(payload.total))}</p>` : ""}
          ${payload.delivery ? `<p>Livrare: ${payload.delivery}</p>` : ""}`,
       );
     case "payment_confirmed":
-      return wrap("Plata a fost confirmată", `<p>Comanda ${payload.orderNumber} este plătită (${formatRon(Number(payload.total ?? 0))}).</p>`);
+      return wrap(
+        "Plata a fost confirmată",
+        `<p>Mulțumim. Comanda ${payload.orderNumber} este la noi (${formatRon(Number(payload.total ?? 0))}). Pregătim următorii pași și te ținem la curent.</p>`,
+      );
     case "order_processing":
-      return wrap("Comanda se procesează", `<p>Pregătim comanda ${payload.orderNumber}.</p>`);
+      return wrap("Pregătim comanda", `<p>Pregătim produsele pentru comanda ${payload.orderNumber}.</p>`);
     case "order_shipped":
-      return wrap("Comanda a fost trimisă", `<p>Comanda ${payload.orderNumber} a plecat la drum.</p>`);
+      return wrap("Comanda ta este în drum", `<p>Comanda ${payload.orderNumber} a fost expediată.</p>`);
     case "order_delivered":
-      return wrap("Comanda a fost livrată", `<p>Comanda ${payload.orderNumber} a fost marcată ca livrată.</p>`);
+      return wrap("Comanda a ajuns", `<p>Comanda ${payload.orderNumber} a fost marcată ca livrată. Sperăm să-și găsească locul în zilele tale.</p>`);
     case "order_cancelled":
-      return wrap("Comanda a fost anulată", `<p>Comanda ${payload.orderNumber} a fost anulată.</p>`);
+      return wrap("Comanda a fost anulată", `<p>Comanda ${payload.orderNumber} a fost anulată. Dacă ai întrebări, scrie-ne.</p>`);
     case "order_refund":
       return wrap("Rambursare", `<p>Am inițiat rambursarea pentru comanda ${payload.orderNumber}.</p>`);
     case "return_received":

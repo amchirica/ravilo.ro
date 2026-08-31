@@ -60,7 +60,7 @@ export default async function HomepageAdmin() {
         <form action={seedDefaultSections} className="mt-6 border border-line bg-card p-5">
           <p className="text-sm text-mute">
             Nu există încă o structură pentru pagina de acasă. Creează secțiunile de bază (hero, categorii, produse,
-            best sellers, newsletter) ca să le poți edita aici.
+            best sellers) ca să le poți edita aici.
           </p>
           <Button type="submit" className="mt-4">
             Creează structura paginii de acasă
@@ -70,7 +70,7 @@ export default async function HomepageAdmin() {
       <form action={addSection} className="mt-6 flex flex-wrap items-end gap-3">
         <Field label="Adaugă o secțiune">
           <Select name="type" defaultValue="EDITORIAL">
-            {HOMEPAGE_SECTION_TYPES.map((type) => (
+            {HOMEPAGE_SECTION_TYPES.filter((type) => type !== "NEWSLETTER").map((type) => (
               <option key={type} value={type}>
                 {homepageSectionLabel(type)}
               </option>
@@ -257,47 +257,56 @@ function defaultHomepageSections() {
   return [
     {
       type: "HERO" as const,
-      title: "Lucruri bune. Alese simplu.",
-      title_en: "Good things. Simply chosen.",
-      subtitle: "Produse utile pentru mașină, casă, tehnologie și călătorii.",
-      subtitle_en: "Useful products for your car, home, tech and travel.",
+      title: "Lucruri bune pentru viața de zi cu zi.",
+      title_en: "Good things for everyday life.",
+      subtitle: "O selecție atentă pentru casă, familie, drum și timpul tău.",
+      subtitle_en: "A careful selection for home, family, the road, and your time.",
       content: {
-        headline: "Lucruri bune. Alese simplu.",
-        body: "Produse utile pentru mașină, casă, tehnologie și călătorii.",
+        headline: "Lucruri bune pentru viața de zi cu zi.",
+        body: "O selecție atentă pentru casă, familie, drum și timpul tău.",
         cta1: { label: "Descoperă produsele", href: "/produse" },
         cta2: { label: "Vezi noutățile", href: "/noutati" },
       },
       content_en: {
-        headline: "Good things. Simply chosen.",
-        body: "Useful products for your car, home, tech and travel.",
-        cta1: { label: "Shop products", href: "/produse" },
-        cta2: { label: "See what's new", href: "/noutati" },
+        headline: "Good things for everyday life.",
+        body: "A careful selection for home, family, the road, and your time.",
+        cta1: { label: "Discover the products", href: "/produse" },
+        cta2: { label: "See what’s new", href: "/noutati" },
       },
     },
     {
+      type: "EDITORIAL" as const,
+      title: "Mai puține lucruri. Alegeri mai bune.",
+      title_en: "Fewer things. Better choices.",
+      subtitle: "La RAVILO căutăm produse pe care chiar să le folosești. Lucruri simple, utile și bine alese pentru casă, familie, mașină și viața de zi cu zi.",
+      subtitle_en: "At RAVILO we look for products you will actually use. Simple, useful things, chosen for home, family, the car, and everyday life.",
+      content: {},
+      content_en: {},
+    },
+    {
       type: "CATEGORY_GRID" as const,
-      title: "Categorii",
-      title_en: "Categories",
-      subtitle: "",
-      subtitle_en: "",
+      title: "Pentru lucrurile care fac parte din fiecare zi.",
+      title_en: "For the things that belong in every day.",
+      subtitle: "De acasă până la drumurile lungi, găsește lucruri practice pentru momentele care se repetă.",
+      subtitle_en: "From home to longer journeys, practical things for the moments that keep coming back.",
       content: {},
       content_en: {},
     },
     {
       type: "FEATURED_PRODUCTS" as const,
-      title: "Alese de noi",
-      title_en: "Chosen by us",
-      subtitle: "",
-      subtitle_en: "",
+      title: "Alese pentru fiecare zi",
+      title_en: "Chosen for every day",
+      subtitle: "Produse simple și utile, alese pentru felul în care trăim zi de zi.",
+      subtitle_en: "Simple, useful products, chosen for the way we live.",
       content: {},
       content_en: {},
     },
     {
       type: "BESTSELLERS" as const,
-      title: "Best Sellers",
-      title_en: "Best Sellers",
-      subtitle: "",
-      subtitle_en: "",
+      title: "Cele mai alese",
+      title_en: "Most chosen",
+      subtitle: "Lucruri care merită locul lor.",
+      subtitle_en: "Things that earn their place.",
       content: {},
       content_en: {},
     },
@@ -311,13 +320,27 @@ function defaultHomepageSections() {
       content_en: {},
     },
     {
-      type: "NEWSLETTER" as const,
-      title: "Primește noutăți care chiar merită.",
-      title_en: "News worth opening.",
-      subtitle: "Nu te abonăm automat. Consimțământul se bifează explicit.",
-      subtitle_en: "We never subscribe you automatically. Consent is explicit.",
-      content: {},
-      content_en: {},
+      type: "WHY_RAVILO" as const,
+      title: "De ce RAVILO?",
+      title_en: "Why RAVILO?",
+      subtitle: "",
+      subtitle_en: "",
+      content: {
+        items: [
+          { title: "Ales cu grijă", body: "Nu adăugăm produse doar ca să avem mai multe. Fiecare trebuie să aibă un rost." },
+          { title: "Util în viața reală", body: "Căutăm lucruri pe care chiar să le folosești, nu doar să le pui în coș." },
+          { title: "Simplu de cumpărat", body: "Informații clare, plată sigură și o experiență fără complicații." },
+          { title: "Suntem aici", body: "Dacă ai o întrebare, scrie-ne. Preferăm un răspuns clar, nu un zid de formulare." },
+        ],
+      },
+      content_en: {
+        items: [
+          { title: "Chosen with care", body: "We don’t add products just to have more. Each one should have a reason." },
+          { title: "Useful in real life", body: "We look for things you will actually use, not just add to a cart." },
+          { title: "Simple to buy", body: "Clear information, secure payment, and an experience without extra noise." },
+          { title: "We’re here", body: "If you have a question, write to us. We prefer a clear answer over a wall of forms." },
+        ],
+      },
     },
   ];
 }

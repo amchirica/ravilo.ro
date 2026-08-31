@@ -15,7 +15,7 @@ import { StoreBanners } from "@/components/storefront/store-banners";
 export default async function CartPage() {
   const locale = (await getLocale()) as AppLocale;
   const t = await getTranslations("cart");
-  const tSearch = await getTranslations("search");
+  const tHome = await getTranslations("home");
   const [cart, settings] = await Promise.all([getCartView(), getStoreSettings()]);
   const ids = cart.items.map((item) => item.variantId);
   const variants =
@@ -48,9 +48,9 @@ export default async function CartPage() {
     <>
       <StoreBanners placement="cart" variant="strip" />
       <Container className="py-12 md:py-16">
-      <PageTitle title={t("title")} />
+      <PageTitle title={t("title")} description={cart.items.length ? t("filledHint") : undefined} />
       {cart.items.length === 0 ? (
-        <EmptyState title={t("empty")} hint={t("emptyHint")} actionHref="/produse" actionLabel={tSearch("discover")} />
+        <EmptyState title={t("empty")} hint={t("emptyHint")} actionHref="/produse" actionLabel={tHome("ctaPrimary")} />
       ) : (
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
           <ul>
@@ -129,7 +129,7 @@ export default async function CartPage() {
             <Button href="/checkout" className="mt-8 w-full">
               {t("checkout")}
             </Button>
-            <Button href="/produse" variant="line" className="mt-3 w-full">
+            <Button href="/produse" variant="secondary" className="mt-3 w-full">
               {t("continue")}
             </Button>
           </aside>

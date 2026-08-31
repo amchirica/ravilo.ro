@@ -19,15 +19,10 @@ export function HeaderSearch() {
   const action = withLocalePrefix("/cautare", locale);
   const [q, setQ] = useState("");
   const [overlay, setOverlay] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [hits, setHits] = useState<Groups | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const ready = q.trim().length >= 2;
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (!overlay) return;
@@ -81,7 +76,7 @@ export function HeaderSearch() {
       <IconButton type="button" aria-label={t("title")} onClick={() => setOverlay(true)}>
         <Search size={18} strokeWidth={1.5} />
       </IconButton>
-      {overlay && mounted
+      {overlay
         ? createPortal(
         <div className="fixed inset-0 z-[80] h-dvh overflow-y-auto bg-paper" role="dialog" aria-modal="true" aria-label={t("title")}>
           <div className="mx-auto flex min-h-full max-w-3xl flex-col px-4 py-8 sm:px-6">
@@ -109,7 +104,7 @@ export function HeaderSearch() {
               <p className="mt-3 text-xs text-mute">{t("shortcut")}</p>
             </form>
             <div className="mt-10 flex-1 overflow-y-auto">
-              {ready && hits && !hasHits ? <p className="text-mute">{t("noResults")}</p> : null}
+                  {ready && hits && !hasHits ? <p className="text-mute">{t("noResults", { query: q })}</p> : null}
               {ready && hits
                 ? (["boosts", "products", "categories", "collections", "articles", "guides"] as const).map((group) =>
                     hits[group]?.length ? (

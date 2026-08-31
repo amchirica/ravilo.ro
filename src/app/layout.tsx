@@ -23,15 +23,17 @@ const serif = Instrument_Serif({
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const settings = await getStoreSettings();
+    const title = freshSeoTitle(settings.defaultSeoTitle);
+    const description = freshSeoDescription(settings.defaultSeoDescription);
     return {
       metadataBase: new URL(process.env.APP_URL ?? "http://localhost:3000"),
-      title: { default: settings.defaultSeoTitle, template: `%s — ${settings.storeName}` },
-      description: settings.defaultSeoDescription,
+      title: { default: title, template: `%s — ${settings.storeName}` },
+      description,
       icons: {
         icon: [{ url: "/favicon.ico", sizes: "any" }],
         apple: "/apple-touch-icon.png",
       },
-      openGraph: { title: settings.defaultSeoTitle, description: settings.defaultSeoDescription, locale: "ro_RO", type: "website" },
+      openGraph: { title, description, locale: "ro_RO", type: "website" },
       robots: { index: true, follow: true },
       alternates: {
         languages: {
@@ -44,10 +46,24 @@ export async function generateMetadata(): Promise<Metadata> {
   } catch {
     return {
       title: "RAVILO",
-      description: "Lucruri bune. Alese simplu.",
+      description: "Lucruri bune pentru viața de zi cu zi.",
       icons: { icon: "/favicon.ico" },
     };
   }
+}
+
+function freshSeoTitle(value: string) {
+  if (value.trim() === "RAVILO — Lucruri bune. Alese simplu.") {
+    return "RAVILO — Lucruri bune pentru viața de zi cu zi.";
+  }
+  return value;
+}
+
+function freshSeoDescription(value: string) {
+  if (value.trim() === "Produse utile pentru mașină, casă, tehnologie și călătorii.") {
+    return "O selecție atentă pentru casă, familie, drum și timpul tău.";
+  }
+  return value;
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

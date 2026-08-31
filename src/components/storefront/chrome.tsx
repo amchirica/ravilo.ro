@@ -91,7 +91,6 @@ export async function StoreHeader() {
 }
 
 export async function StoreFooter() {
-  const locale = (await getLocale()) as AppLocale;
   const t = await getTranslations();
   const settings = await getStoreSettings();
   const year = new Date().getFullYear();
@@ -101,11 +100,11 @@ export async function StoreFooter() {
       <Container className="grid gap-12 py-16 md:grid-cols-12 md:gap-8 md:py-24">
         <div className="md:col-span-4">
           <BrandLogo href="/" height={36} />
-          <p className="mt-5 max-w-xs text-sm leading-relaxed text-mute">
-            {locale === "en" ? t("meta.tagline") : settings.tagline}
-          </p>
-          <div className="max-w-sm">
+          <p className="mt-5 max-w-xs text-sm leading-relaxed text-mute">{t("meta.tagline")}</p>
+          <div className="mt-8 max-w-sm">
+            <p className="text-sm tracking-[-0.02em]">{t("home.newsletter")}</p>
             <NewsletterForm source="footer" />
+            <p className="mt-2 text-xs leading-relaxed text-mute">{t("home.newsletterHint")}</p>
           </div>
         </div>
         <nav className="grid gap-3 md:col-span-2" aria-label={t("nav.shop")}>
@@ -147,16 +146,16 @@ export async function StoreFooter() {
             {t("nav.trackOrder")}
           </Link>
         </nav>
-        <nav className="grid gap-3 md:col-span-2" aria-label={t("nav.discover")}>
-          <p className="eyebrow">{t("nav.discover")}</p>
+        <nav className="grid gap-3 md:col-span-2" aria-label={t("meta.storeName")}>
+          <p className="eyebrow">{t("meta.storeName")}</p>
+          <Link prefetch={false} href="/despre" className={linkClass}>
+            {t("nav.about")}
+          </Link>
           <Link prefetch={false} href="/blog" className={linkClass}>
             {t("nav.journal")}
           </Link>
           <Link prefetch={false} href="/ghiduri" className={linkClass}>
             {t("nav.guides")}
-          </Link>
-          <Link prefetch={false} href="/despre" className={linkClass}>
-            {t("nav.about")}
           </Link>
           <Link prefetch={false} href="/recenzii" className={linkClass}>
             {t("nav.reviews")}

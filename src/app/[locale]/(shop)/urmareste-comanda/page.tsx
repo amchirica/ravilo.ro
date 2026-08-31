@@ -16,6 +16,13 @@ export default async function TrackOrderPage({ searchParams }: { searchParams: P
     SHIPPED: t("shipped"),
     DELIVERED: t("delivered"),
   };
+  const hints: Record<string, string> = {
+    RECEIVED: t("receivedHint"),
+    CONFIRMED: t("confirmedHint"),
+    PROCESSING: t("processingHint"),
+    SHIPPED: t("shippedHint"),
+    DELIVERED: t("deliveredHint"),
+  };
   return (
     <Container className="max-w-xl py-16">
       <h1 className="font-display text-5xl">{t("title")}</h1>
@@ -34,13 +41,19 @@ export default async function TrackOrderPage({ searchParams }: { searchParams: P
         <div className="mt-10 border-t border-line pt-8">
           <p className="text-xs uppercase tracking-[0.16em] text-mute">{order.publicOrderNumber}</p>
           {current === "CANCELLED" ? (
-            <p className="mt-4 font-display text-2xl">{t("cancelled")}</p>
+            <div className="mt-4">
+              <p className="font-display text-2xl">{t("cancelled")}</p>
+              <p className="mt-2 text-sm text-mute">{t("cancelledHint")}</p>
+            </div>
           ) : (
-            <ol className="mt-6 grid gap-3">
+            <ol className="mt-6 grid gap-4">
               {steps.map((step) => (
                 <li key={step.status} className={step.done ? "text-ink" : "text-mute"}>
                   <span className="mr-2">{step.done ? "●" : "○"}</span>
                   {labels[step.status]}
+                  {step.current && hints[step.status] ? (
+                    <p className="mt-1 pl-5 text-sm text-mute">{hints[step.status]}</p>
+                  ) : null}
                 </li>
               ))}
             </ol>

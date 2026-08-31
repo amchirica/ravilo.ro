@@ -109,6 +109,8 @@ export async function CatalogBrowser({
   seoContent?: string;
 }) {
   const t = await getTranslations("catalog");
+  const tHome = await getTranslations("home");
+  const tNav = await getTranslations("nav");
   const slug = categorySlug ?? query.categorie;
   const category = slug ? await getCategoryBySlug(slug, locale) : null;
   const children = category ? await getChildCategories(category.id, locale) : [];
@@ -205,7 +207,11 @@ export async function CatalogBrowser({
           />
         </aside>
         <div>
-          {items.length ? <ProductGrid products={items} /> : <EmptyState title={t("empty")} hint={t("emptyHint")} />}
+          {items.length ? (
+            <ProductGrid products={items} />
+          ) : (
+            <EmptyState title={t("empty")} hint={t("emptyHint")} actionHref="/produse" actionLabel={tHome("ctaPrimary")} />
+          )}
           {pages > 1 ? (
             <nav className="mt-12 flex flex-wrap gap-2" aria-label={t("pagination")}>
               {Array.from({ length: pages }, (_, index) => (
@@ -230,7 +236,7 @@ export async function CatalogBrowser({
         </div>
       </div>
       {seoContent ? <div className="prose-ravilo mt-16 max-w-3xl text-mute">{seoContent}</div> : null}
-      <FaqList items={faqs} title="FAQ" />
+      <FaqList items={faqs} title={tNav("faq")} />
       {relatedArticles.length ? (
         <section className="mt-16">
           <h2 className="font-display text-3xl tracking-[-0.03em]">{t("guidesAndArticles")}</h2>

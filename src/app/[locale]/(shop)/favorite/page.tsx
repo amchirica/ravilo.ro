@@ -10,7 +10,6 @@ import { getTranslations } from "next-intl/server";
 export default async function FavoritePage() {
   const t = await getTranslations("nav");
   const tAccount = await getTranslations("account");
-  const tSearch = await getTranslations("search");
   const user = await getCurrentUser();
   if (!user) {
     return (
@@ -32,7 +31,7 @@ export default async function FavoritePage() {
       {products.length ? (
         <ProductGrid products={products} />
       ) : (
-        <EmptyState title={tAccount("emptyList")} actionHref="/produse" actionLabel={tSearch("discover")} />
+        <EmptyState title={tAccount("emptyWishlist")} hint={tAccount("emptyWishlistHint")} actionHref="/produse" actionLabel={tAccount("browse")} />
       )}
     </Container>
   );

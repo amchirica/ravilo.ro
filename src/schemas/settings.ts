@@ -2,8 +2,8 @@ import { z } from "zod";
 
 export const storeSettingsSchema = z.object({
   storeName: z.string().max(80).default("RAVILO"),
-  tagline: z.string().max(120).default("Lucruri bune. Alese simplu."),
-  positioning: z.string().max(200).default("Practical goods for modern life."),
+  tagline: z.string().max(120).default("Lucruri bune pentru viața de zi cu zi."),
+  positioning: z.string().max(200).default("O selecție atentă pentru casă, familie, drum și timpul tău."),
   companyName: z.string().max(160).default(""),
   cui: z.string().max(20).default(""),
   registrationNumber: z.string().max(40).default(""),
@@ -25,11 +25,11 @@ export const storeSettingsSchema = z.object({
   faviconPath: z.string().max(300).default("/favicon.ico"),
   siteName: z.string().max(80).default("RAVILO"),
   defaultOgImage: z.string().max(300).default("/ravilo.png"),
-  defaultSeoTitle: z.string().max(70).default("RAVILO — Lucruri bune. Alese simplu."),
+  defaultSeoTitle: z.string().max(70).default("RAVILO — Lucruri bune pentru viața de zi cu zi."),
   defaultSeoDescription: z
     .string()
     .max(160)
-    .default("Produse utile pentru mașină, casă, tehnologie și călătorii."),
+    .default("O selecție atentă pentru casă, familie, drum și timpul tău."),
   announcementEnabled: z.boolean().default(true),
   announcementTemplate: z
     .string()

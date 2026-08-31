@@ -9,7 +9,6 @@ import { ProductGrid } from "@/components/storefront/product-grid";
 import { Button, Container, Section, SectionHeader, TextLink } from "@/components/ui/primitives";
 import { formatMoney } from "@/lib/format";
 import { localeAlternates, type AppLocale } from "@/lib/i18n";
-import { NewsletterForm } from "@/components/storefront/newsletter-form";
 import { StoreImage } from "@/components/storefront/store-image";
 import { listApprovedStoreReviews } from "@/services/reviews";
 import { CategoryTile } from "@/components/storefront/category-tile";
@@ -27,6 +26,28 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     description: t("heroSubtitle"),
     alternates: localeAlternates("/", locale as AppLocale, appUrl),
   };
+}
+
+const STALE_HEADLINES = new Set(["Lucruri bune. Alese simplu.", "Good things. Simply chosen."]);
+const STALE_SUBTITLES = new Set([
+  "Produse utile pentru mașină, casă, tehnologie și călătorii.",
+  "Useful products for your car, home, tech and travel.",
+]);
+const STALE_CATEGORY_TITLES = new Set(["Categorii", "Categories"]);
+const STALE_CATEGORY_SUBTITLES = new Set(["Auto, Tech, Home, Travel, EDC."]);
+const STALE_PICKS = new Set(["RAVILO Picks", "RAVILO picks"]);
+const STALE_POPULAR = new Set(["Popular"]);
+const STALE_EDITORIAL = new Set(["Mai puțin zgomot. Mai multă utilitate.", "Less noise. More use."]);
+const STALE_EDITORIAL_BODY = new Set([
+  "RAVILO alege obiecte care rămân în uz, nu în sertarul de impulse.",
+  "RAVILO chooses objects that stay in use, not in the impulse drawer.",
+]);
+const STALE_CTA = new Set(["Shop now", "Shop products", "Learn more"]);
+
+function freshCopy(stored: string | null | undefined, fallback: string, stale: Set<string>) {
+  const value = (stored ?? "").trim();
+  if (!value || stale.has(value)) return fallback;
+  return value;
 }
 
 function ctaHref(content: Record<string, unknown>, key: string, fallback: string) {
@@ -75,8 +96,13 @@ export default async function HomePage() {
           secondaryHref="/noutati"
           secondaryLabel={t("home.ctaSecondary")}
         />
+        <BrandStatement title={t("home.statementTitle")} body={t("home.statementBody")} />
         {categories.length ? (
-          <CategoryStrip title={t("nav.allCategories")} categories={categories} />
+          <CategoryStrip
+            title={t("home.categoriesTitle")}
+            subtitle={t("home.categoriesSubtitle")}
+            categories={categories}
+          />
         ) : null}
         {featured.items.length ? (
           <Section>
@@ -86,7 +112,16 @@ export default async function HomePage() {
             </Container>
           </Section>
         ) : null}
-        <NewsletterBlock title={t("home.newsletter")} hint={t("home.newsletterHint")} />
+        <PlacesBanner title={t("home.placesTitle")} body={t("home.placesBody")} cta={t("home.placesCta")} />
+        <WhyRavilo
+          title={t("home.why")}
+          items={[
+            { title: t("home.why1Title"), body: t("home.why1Body") },
+            { title: t("home.why2Title"), body: t("home.why2Body") },
+            { title: t("home.why3Title"), body: t("home.why3Body") },
+            { title: t("home.why4Title"), body: t("home.why4Body") },
+          ]}
+        />
       </div>
     );
   }
@@ -99,29 +134,40 @@ export default async function HomePage() {
         if (section.type === "HERO") {
           const image = typeof content.image === "string" ? content.image : "";
           return (
-            <Hero
-              key={section.id}
-              eyebrow={settings.storeName}
-              headline={section.title || String(content.headline ?? t("home.heroHeadline"))}
-              body={section.subtitle || String(content.body ?? t("home.heroSubtitle"))}
-              primaryHref={ctaHref(content, "cta1", "/produse")}
-              primaryLabel={ctaLabel(content, "cta1", t("home.ctaPrimary"))}
-              secondaryHref={ctaHref(content, "cta2", "/noutati")}
-              secondaryLabel={ctaLabel(content, "cta2", t("home.ctaSecondary"))}
-              image={image}
-              imageAlt={settings.storeName}
-            />
+            <div key={section.id}>
+              <Hero
+                eyebrow={settings.storeName}
+                headline={freshCopy(section.title || String(content.headline ?? ""), t("home.heroHeadline"), STALE_HEADLINES)}
+                body={freshCopy(section.subtitle || String(content.body ?? ""), t("home.heroSubtitle"), STALE_SUBTITLES)}
+                primaryHref={ctaHref(content, "cta1", "/produse")}
+                primaryLabel={freshCopy(ctaLabel(content, "cta1", t("home.ctaPrimary")), t("home.ctaPrimary"), STALE_CTA)}
+                secondaryHref={ctaHref(content, "cta2", "/noutati")}
+                secondaryLabel={freshCopy(ctaLabel(content, "cta2", t("home.ctaSecondary")), t("home.ctaSecondary"), STALE_CTA)}
+                image={image}
+                imageAlt={settings.storeName}
+              />
+              {!types.has("EDITORIAL") ? (
+                <BrandStatement title={t("home.statementTitle")} body={t("home.statementBody")} />
+              ) : null}
+            </div>
           );
         }
         if (section.type === "CATEGORY_GRID") {
-          return <CategoryStrip key={section.id} title={section.title} categories={categories} />;
+          return (
+            <CategoryStrip
+              key={section.id}
+              title={freshCopy(section.title, t("home.categoriesTitle"), STALE_CATEGORY_TITLES)}
+              subtitle={freshCopy(section.subtitle, t("home.categoriesSubtitle"), STALE_CATEGORY_SUBTITLES)}
+              categories={categories}
+            />
+          );
         }
         if (section.type === "RAVILO_PICKS") {
           return (
             <Section key={section.id}>
               <Container>
                 <SectionHeader
-                  title={section.title || t("home.picks")}
+                  title={freshCopy(section.title, t("home.picks"), STALE_PICKS)}
                   subtitle={section.subtitle || t("home.picksSubtitle")}
                   action={
                     <TextLink href="/colectii/ravilo-picks">{t("home.seeAll")}</TextLink>
@@ -138,7 +184,8 @@ export default async function HomePage() {
             <Section key={section.id}>
               <Container>
                 <SectionHeader
-                  title={section.title || t("home.popular")}
+                  title={freshCopy(section.title, t("home.popular"), STALE_POPULAR)}
+                  subtitle={section.subtitle || t("home.popularSubtitle")}
                   action={<TextLink href="/best-sellers">{t("home.seeAll")}</TextLink>}
                 />
                 <ProductGrid products={popular} />
@@ -150,7 +197,7 @@ export default async function HomePage() {
           return (
             <Section key={section.id}>
               <Container>
-                <SectionHeader title={section.title} />
+                <SectionHeader title={section.title || t("home.picks")} subtitle={section.subtitle || t("home.picksSubtitle")} />
                 <ProductGrid products={featured.items} />
               </Container>
             </Section>
@@ -231,27 +278,15 @@ export default async function HomePage() {
         }
         if (section.type === "TRUST") {
           const items = (content.items as { title: string; body: string }[] | undefined) ?? [];
-          return (
-            <section key={section.id} className="border-y border-line">
-              <Container className="grid gap-10 py-16 md:grid-cols-4 md:gap-8 md:py-20">
-                {items.map((item) => (
-                  <div key={item.title}>
-                    <h3 className="text-sm tracking-[-0.01em]">{item.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-mute">{item.body}</p>
-                  </div>
-                ))}
-              </Container>
-            </section>
-          );
+          return <WhyRavilo key={section.id} title={section.title || t("home.why")} items={items} />;
         }
         if (section.type === "EDITORIAL") {
           return (
-            <Section key={section.id}>
-              <Container className="grid gap-8 md:grid-cols-12">
-                <h2 className="font-display text-4xl tracking-[-0.03em] md:col-span-5 md:text-5xl">{section.title}</h2>
-                <p className="max-w-xl text-lg leading-relaxed text-mute md:col-span-6 md:col-start-7">{section.subtitle}</p>
-              </Container>
-            </Section>
+            <BrandStatement
+              key={section.id}
+              title={freshCopy(section.title, t("home.statementTitle"), STALE_EDITORIAL)}
+              body={freshCopy(section.subtitle, t("home.statementBody"), STALE_EDITORIAL_BODY)}
+            />
           );
         }
         if (section.type === "JOURNAL") {
@@ -279,22 +314,16 @@ export default async function HomePage() {
           );
         }
         if (section.type === "WHY_RAVILO") {
-          const items = (content.items as { title: string; body: string }[] | undefined) ?? [];
-          return (
-            <Section key={section.id}>
-              <Container>
-                <SectionHeader title={section.title} subtitle={section.subtitle} />
-                <div className="grid gap-10 md:grid-cols-3 md:gap-12">
-                  {items.map((item) => (
-                    <div key={item.title}>
-                      <h3 className="text-base tracking-[-0.02em]">{item.title}</h3>
-                      <p className="mt-3 text-sm leading-relaxed text-mute">{item.body}</p>
-                    </div>
-                  ))}
-                </div>
-              </Container>
-            </Section>
-          );
+          const stored = (content.items as { title: string; body: string }[] | undefined) ?? [];
+          const items = stored.length
+            ? stored
+            : [
+                { title: t("home.why1Title"), body: t("home.why1Body") },
+                { title: t("home.why2Title"), body: t("home.why2Body") },
+                { title: t("home.why3Title"), body: t("home.why3Body") },
+                { title: t("home.why4Title"), body: t("home.why4Body") },
+              ];
+          return <WhyRavilo key={section.id} title={section.title || t("home.why")} items={items} />;
         }
         if (section.type === "REVIEWS") {
           if (!storeReviews.length) return null;
@@ -315,15 +344,7 @@ export default async function HomePage() {
             </Section>
           );
         }
-        if (section.type === "NEWSLETTER") {
-          return (
-            <NewsletterBlock
-              key={section.id}
-              title={section.title || t("home.newsletter")}
-              hint={section.subtitle || t("home.newsletterHint")}
-            />
-          );
-        }
+        if (section.type === "NEWSLETTER") return null;
         if (section.type === "COLLECTION" || section.type === "CUSTOM_BANNER") {
           if (section.type === "CUSTOM_BANNER") {
             const image = String(content.image ?? "");
@@ -375,6 +396,20 @@ export default async function HomePage() {
         }
         return null;
       })}
+      {!types.has("CUSTOM_BANNER") ? (
+        <PlacesBanner title={t("home.placesTitle")} body={t("home.placesBody")} cta={t("home.placesCta")} />
+      ) : null}
+      {!types.has("WHY_RAVILO") && !types.has("TRUST") ? (
+        <WhyRavilo
+          title={t("home.why")}
+          items={[
+            { title: t("home.why1Title"), body: t("home.why1Body") },
+            { title: t("home.why2Title"), body: t("home.why2Body") },
+            { title: t("home.why3Title"), body: t("home.why3Body") },
+            { title: t("home.why4Title"), body: t("home.why4Body") },
+          ]}
+        />
+      ) : null}
     </div>
   );
 }
@@ -411,7 +446,7 @@ function Hero({
           <p className="mt-6 max-w-md text-[1.05rem] leading-relaxed text-mute">{body}</p>
           <div className="mt-10 flex flex-wrap gap-3">
             <Button href={primaryHref}>{primaryLabel}</Button>
-            <Button href={secondaryHref} variant="line">
+            <Button href={secondaryHref} variant="secondary">
               {secondaryLabel}
             </Button>
           </div>
@@ -428,16 +463,18 @@ function Hero({
 
 function CategoryStrip({
   title,
+  subtitle,
   categories,
 }: {
   title: string;
+  subtitle?: string;
   categories: { id: string; slug: string; name: string; heroImage?: string | null }[];
 }) {
   if (!categories.length) return null;
   return (
     <Section>
       <Container>
-        <SectionHeader title={title} />
+        <SectionHeader title={title} subtitle={subtitle} />
         <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-4 md:gap-x-8 md:gap-y-14">
           {categories.map((category) => (
             <CategoryTile
@@ -473,16 +510,47 @@ function ArticleRow({
   );
 }
 
-function NewsletterBlock({ title, hint }: { title: string; hint: string }) {
+function BrandStatement({ title, body }: { title: string; body: string }) {
   return (
-    <section className="bg-surface">
-      <Container className="grid items-end gap-8 py-16 md:grid-cols-2 md:py-24">
-        <div>
-          <h2 className="font-display text-4xl tracking-[-0.03em] md:text-5xl">{title}</h2>
-          <p className="mt-4 max-w-md text-mute">{hint}</p>
-        </div>
-        <NewsletterForm source="homepage" />
+    <Section className="bg-surface">
+      <Container className="grid gap-8 md:grid-cols-12">
+        <h2 className="font-display text-4xl tracking-[-0.03em] md:col-span-5 md:text-5xl">{title}</h2>
+        <p className="max-w-xl text-lg leading-relaxed text-mute md:col-span-6 md:col-start-7">{body}</p>
       </Container>
-    </section>
+    </Section>
   );
 }
+
+function PlacesBanner({ title, body, cta }: { title: string; body: string; cta: string }) {
+  return (
+    <Section className="bg-surface">
+      <Container className="max-w-3xl">
+        <h2 className="font-display text-4xl tracking-[-0.03em] md:text-5xl">{title}</h2>
+        <p className="mt-5 max-w-xl text-lg leading-relaxed text-mute">{body}</p>
+        <Button href="/produse" variant="secondary" className="mt-10">
+          {cta}
+        </Button>
+      </Container>
+    </Section>
+  );
+}
+
+function WhyRavilo({ title, items }: { title: string; items: { title: string; body: string }[] }) {
+  if (!items.length) return null;
+  return (
+    <Section>
+      <Container>
+        <SectionHeader title={title} />
+        <div className="grid gap-10 md:grid-cols-2 md:gap-12 lg:grid-cols-4">
+          {items.map((item) => (
+            <div key={item.title}>
+              <h3 className="text-base tracking-[-0.02em]">{item.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-mute">{item.body}</p>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </Section>
+  );
+}
+

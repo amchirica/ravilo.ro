@@ -10,11 +10,8 @@ export default async function NotFound() {
       <p className="mx-auto mt-4 max-w-md text-mute">{t("notFoundHint")}</p>
       <div className="mt-10 flex flex-wrap justify-center gap-3">
         <Button href="/">{t("home")}</Button>
-        <Button href="/produse" variant="line">
+        <Button href="/produse" variant="secondary">
           {t("seeProducts")}
-        </Button>
-        <Button href="/cautare" variant="line">
-          {t("search")}
         </Button>
       </div>
     </Container>

@@ -9,11 +9,13 @@ import {
   subscribeWishlist,
 } from "@/lib/wishlist-store";
 
+import { EmptyState } from "@/components/storefront/empty-state";
+
 export function GuestWishlist() {
   const t = useTranslations("account");
   const entries = useSyncExternalStore(subscribeWishlist, getWishlistEntriesSnapshot, getServerWishlistSnapshot);
   if (entries.length === 0) {
-    return <p className="mt-8 text-mute">{t("guestWishlistEmpty")}</p>;
+    return <EmptyState title={t("emptyWishlist")} hint={t("emptyWishlistHint")} actionHref="/produse" actionLabel={t("browse")} />;
   }
   return (
     <ul className="mt-8 divide-y divide-line">

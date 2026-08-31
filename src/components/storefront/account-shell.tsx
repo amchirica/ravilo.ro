@@ -13,11 +13,13 @@ const LINKS = [
 
 export async function AccountShell({
   title,
+  description,
   current,
   children,
   actions,
 }: {
   title: string;
+  description?: string;
   current: (typeof LINKS)[number]["key"];
   children: React.ReactNode;
   actions?: React.ReactNode;
@@ -26,7 +28,10 @@ export async function AccountShell({
   return (
     <Container className="py-12 md:py-16">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <h1 className="font-display text-[2.5rem] leading-[1.08] tracking-[-0.04em] md:text-5xl">{title}</h1>
+        <div>
+          <h1 className="font-display text-[2.5rem] leading-[1.08] tracking-[-0.04em] md:text-5xl">{title}</h1>
+          {description ? <p className="mt-3 max-w-xl text-mute">{description}</p> : null}
+        </div>
         {actions}
       </div>
       <div className="mt-10 grid gap-10 md:grid-cols-[200px_minmax(0,1fr)] md:gap-14">

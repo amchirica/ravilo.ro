@@ -13,7 +13,7 @@ export const HOMEPAGE_SECTION_LABELS: Record<HomepageSectionType, string> = {
   BESTSELLERS: "Best Sellers",
   TRUST: "Motive de încredere",
   JOURNAL: "Jurnal",
-  NEWSLETTER: "Newsletter",
+  NEWSLETTER: "Newsletter (doar footer — nu pe homepage)",
   CUSTOM_BANNER: "Banner personalizat",
   WHY_RAVILO: "De ce RAVILO",
   REVIEWS: "Recenzii",

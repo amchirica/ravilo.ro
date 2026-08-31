@@ -145,6 +145,8 @@ export async function getPublishedPage(slug: string, locale?: AppLocale) {
     seoTitleEn: string | null;
     seoDescription: string | null;
     seoDescriptionEn: string | null;
+    excerpt?: string | null;
+    coverUrl?: string | null;
   }>(data);
   const content = pickLocalized(page.content, page.contentEn, language);
   return {
@@ -152,6 +154,8 @@ export async function getPublishedPage(slug: string, locale?: AppLocale) {
     title: pickLocalized(page.title, page.titleEn, language),
     seoTitle: pickLocalized(page.seoTitle, page.seoTitleEn, language) || null,
     seoDescription: pickLocalized(page.seoDescription, page.seoDescriptionEn, language) || null,
+    excerpt: page.excerpt ?? "",
+    coverUrl: page.coverUrl ?? null,
     content: sanitizeCmsHtml(content),
   };
 }
@@ -203,6 +207,7 @@ export async function getPublishedArticles(take = 6, locale?: AppLocale, kind: "
     contentKind?: string;
     category: string | null;
     publishedAt: Date | string | null;
+    coverUrl?: string | null;
   }>(data)
     .filter((article) => {
       const rowKind = article.contentKind === "GUIDE" ? "GUIDE" : "ARTICLE";
@@ -217,6 +222,7 @@ export async function getPublishedArticles(take = 6, locale?: AppLocale, kind: "
       kind: (article.contentKind === "GUIDE" ? "GUIDE" : "ARTICLE") as "ARTICLE" | "GUIDE",
       category: article.category,
       publishedAt: article.publishedAt,
+      coverUrl: article.coverUrl ?? null,
       href: article.contentKind === "GUIDE" ? `/ghiduri/${article.slug}` : `/blog/${article.slug}`,
     }));
 }
@@ -245,6 +251,8 @@ export async function getPublishedArticle(slug: string, locale?: AppLocale, expe
     contentKind?: string;
     updatedAt?: Date | string | null;
     coverUrl?: string | null;
+    ctaLabel?: string | null;
+    ctaUrl?: string | null;
   }>(data);
   const { data: links } = await sb().from("article_products").select("product_id").eq("article_id", article.id);
   const kind = article.contentKind === "GUIDE" ? "GUIDE" : "ARTICLE";
@@ -257,6 +265,9 @@ export async function getPublishedArticle(slug: string, locale?: AppLocale, expe
     seoTitle: pickLocalized(article.seoTitle, article.seoTitleEn, language) || null,
     seoDescription: pickLocalized(article.seoDescription, article.seoDescriptionEn, language) || null,
     content: sanitizeCmsHtml(pickLocalized(article.content, article.contentEn, language)),
+    coverUrl: article.coverUrl ?? null,
+    ctaLabel: article.ctaLabel ?? "",
+    ctaUrl: article.ctaUrl ?? "",
     products: links ?? [],
     href: kind === "GUIDE" ? `/ghiduri/${article.slug}` : `/blog/${article.slug}`,
   };

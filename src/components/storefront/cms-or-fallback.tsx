@@ -1,5 +1,6 @@
 import { getPublishedPage } from "@/services/cms";
 import { Container } from "@/components/ui/primitives";
+import { EditorialHero } from "@/components/storefront/editorial-hero";
 import { getLocale } from "next-intl/server";
 import type { AppLocale } from "@/lib/i18n";
 import type { Metadata } from "next";
@@ -11,8 +12,9 @@ export async function cmsPageMetadata(slug: string, fallbackTitle: string, local
   const appUrl = process.env.APP_URL ?? "http://localhost:3000";
   return {
     title: page?.seoTitle ?? page?.title ?? fallbackTitle,
-    description: page?.seoDescription ?? undefined,
+    description: page?.seoDescription ?? page?.excerpt ?? undefined,
     alternates: localeAlternates(`/${slug}`, locale as AppLocale, appUrl),
+    openGraph: page?.coverUrl ? { images: [page.coverUrl] } : undefined,
   };
 }
 
@@ -27,13 +29,14 @@ export async function CmsOrFallbackPage({
 }) {
   const locale = (await getLocale()) as AppLocale;
   const page = await getPublishedPage(slug, locale);
+  const title = page?.title ?? fallbackTitle;
+  const html = sanitizeCmsHtml(page?.content || fallbackHtml);
   return (
-    <Container className="prose-ravilo max-w-3xl py-16">
-      <h1 className="font-display text-5xl">{page?.title ?? fallbackTitle}</h1>
-      <div
-        className="mt-8 space-y-4 text-lg leading-relaxed text-ink-2"
-        dangerouslySetInnerHTML={{ __html: sanitizeCmsHtml(page?.content || fallbackHtml) }}
-      />
-    </Container>
+    <article>
+      <EditorialHero title={title} description={page?.excerpt} image={page?.coverUrl} imageAlt={title} />
+      <Container className="prose-ravilo max-w-3xl pb-16">
+        <div className="space-y-4 text-lg leading-relaxed text-ink-2" dangerouslySetInnerHTML={{ __html: html }} />
+      </Container>
+    </article>
   );
 }

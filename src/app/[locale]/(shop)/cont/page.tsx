@@ -14,7 +14,7 @@ import { AccountShell } from "@/components/storefront/account-shell";
 export default async function AccountPage() {
   const locale = (await getLocale()) as AppLocale;
   const t = await getTranslations("account");
-  const tSearch = await getTranslations("search");
+  const tHome = await getTranslations("home");
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login?next=/cont");
   const rows = await listRows<{
@@ -28,6 +28,7 @@ export default async function AccountPage() {
   return (
     <AccountShell
       title={t("title")}
+      description={t("intro")}
       current="orders"
       actions={
         <form action={logoutAction}>
@@ -41,7 +42,7 @@ export default async function AccountPage() {
         {user.firstName} {user.lastName} · {user.email}
       </p>
       {rows.length === 0 ? (
-        <EmptyState title={t("emptyOrders")} hint={t("emptyOrdersHint")} actionHref="/produse" actionLabel={tSearch("discover")} />
+        <EmptyState title={t("emptyOrders")} hint={t("emptyOrdersHint")} actionHref="/produse" actionLabel={tHome("ctaPrimary")} />
       ) : (
         <ul>
           {rows.map((order) => (

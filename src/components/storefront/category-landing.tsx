@@ -24,6 +24,7 @@ export async function categoryLandingMetadata(slug: string): Promise<Metadata> {
 export async function CategoryLanding({ slug }: { slug: string }) {
   const locale = (await getLocale()) as AppLocale;
   const t = await getTranslations("catalog");
+  const tHome = await getTranslations("home");
   const category = await getCategoryBySlug(slug, locale);
   if (!category) notFound();
   const children = await getChildCategories(category.id, locale);
@@ -35,7 +36,9 @@ export async function CategoryLanding({ slug }: { slug: string }) {
         <Container className="py-16 md:py-24">
           <p className="eyebrow">RAVILO / {category.name}</p>
           <h1 className="mt-4 font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-[0.95] tracking-[-0.04em]">{category.name}</h1>
-          <p className="mt-4 max-w-xl text-lg text-mute">{category.description}</p>
+          <p className="mt-4 max-w-xl text-lg text-mute">
+            {category.description || t("categoryIntro")}
+          </p>
         </Container>
       </section>
       {children.length > 0 ? (
@@ -56,7 +59,11 @@ export async function CategoryLanding({ slug }: { slug: string }) {
         <Container>
           <h2 className="font-display text-3xl tracking-[-0.03em]">{t("products")}</h2>
           <div className="mt-8">
-            {items.length ? <ProductGrid products={items} /> : <EmptyState title={t("empty")} hint={t("emptyHint")} />}
+            {items.length ? (
+              <ProductGrid products={items} />
+            ) : (
+              <EmptyState title={t("empty")} hint={t("emptyHint")} actionHref="/produse" actionLabel={tHome("ctaPrimary")} />
+            )}
           </div>
           <Link href={`/categorie/${slug}`} className="mt-8 inline-block text-xs uppercase tracking-[0.16em]">
             {t("seeCategory")}

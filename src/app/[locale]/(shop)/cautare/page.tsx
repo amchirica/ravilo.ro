@@ -12,7 +12,6 @@ import type { AppLocale } from "@/lib/i18n";
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const t = await getTranslations("search");
-  const catalog = await getTranslations("catalog");
   const locale = (await getLocale()) as AppLocale;
   const { q } = await searchParams;
   const query = (q ?? "").trim().slice(0, 80);
@@ -57,7 +56,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       ) : null}
       <div className="mt-8">
         {empty ? (
-          <EmptyState title={t("noResults")} hint={catalog("emptyHint")} actionHref="/produse" actionLabel={t("discover")} />
+          <EmptyState title={t("noResults", { query })} hint={t("emptyHint")} actionHref="/produse" actionLabel={t("discover")} />
         ) : (
           <ProductGrid products={results.items} />
         )}
