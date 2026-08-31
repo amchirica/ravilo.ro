@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
+  <rect width="800" height="1000" fill="#E8E5DE"/>
+  <rect x="80" y="120" width="640" height="760" fill="#D8D4CB"/>
+  <text x="400" y="520" text-anchor="middle" font-family="Georgia" font-size="42" fill="#171817">TECH · DEMO</text>
+</svg>

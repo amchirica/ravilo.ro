@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000" role="img" aria-label="RAVILO QuickCharge Duo">
+  <rect width="800" height="1000" fill="#F4F2ED"/>
+  <rect x="90" y="90" width="620" height="820" rx="8" fill="#FFFFFF" stroke="#D8D4CB"/>
+  <rect x="220" y="280" width="360" height="360" rx="28" fill="none" stroke="#5C6B4F" stroke-width="3"/>
+  <circle cx="400" cy="460" r="48" fill="none" stroke="#5C6B4F" stroke-width="2"/>
+  <text x="400" y="720" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#171817">RAVILO QuickCharge Duo</text>
+  <text x="400" y="860" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#666660" letter-spacing="6">RAVILO</text>
+</svg>

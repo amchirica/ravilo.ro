@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f6f5f1;
+  --foreground: #1a1a18;
+  --muted: #6f6d67;
+  --muted-foreground: #6f6d67;
+  --surface: #eeece7;
+  --surface-elevated: #fcfbf8;
+  --border: rgba(26, 26, 24, 0.08);
+  --accent: #2f332c;
+  --accent-hover: #1a1c18;
+  --accent-foreground: #f6f5f1;
+  --danger: #8a3d3a;
+  --success: #3d5c45;
+  --warning: #7a6550;
+  --band: #1a1a18;
+  --band-foreground: #f6f5f1;
+  --radius: 0.5rem;
+  --header-h: 4.25rem;
+  color-scheme: light;
+}
+
+.dark {
+  --background: #121311;
+  --foreground: #f3f1eb;
+  --muted: #a8a59c;
+  --muted-foreground: #a8a59c;
+  --surface: #1b1c19;
+  --surface-elevated: #22241f;
+  --border: rgba(243, 241, 235, 0.1);
+  --accent: #c5c0b4;
+  --accent-hover: #ece8de;
+  --accent-foreground: #121311;
+  --danger: #d98986;
+  --success: #8fbf9a;
+  --warning: #c4b08a;
+  --band: #0e0f0d;
+  --band-foreground: #f3f1eb;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-paper: var(--background);
+  --color-ink: var(--foreground);
+  --color-ink-2: var(--foreground);
+  --color-surface: var(--surface);
+  --color-card: var(--surface-elevated);
+  --color-line: var(--border);
+  --color-olive: var(--accent);
+  --color-olive-dark: var(--accent-hover);
+  --color-bronze: var(--warning);
+  --color-mute: var(--muted);
+  --color-band: var(--band);
+  --color-band-fg: var(--band-foreground);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --radius-sm: 0.375rem;
+  --radius-md: var(--radius);
+}
+
+html {
+  scroll-padding-top: calc(var(--header-h) + 0.75rem);
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+summary {
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+body {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01" on, "cv11" on;
+  min-height: 100%;
+  letter-spacing: -0.011em;
+}
+
+.font-display,
+.font-serif {
+  font-family: var(--font-serif), "Times New Roman", serif;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+
+h1.font-display,
+h1.font-serif {
+  line-height: 1.05;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--foreground) 12%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 3px;
+}
+
+img.product-photo,
+video.product-photo {
+  filter: none;
+}
+
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.prose-ravilo {
+  max-width: 42rem;
+  line-height: 1.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
