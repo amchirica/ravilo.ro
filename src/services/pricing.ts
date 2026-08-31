@@ -2,6 +2,7 @@ import "server-only";
 import { isSupabaseConfigured, sb } from "@/lib/supabase/db";
 import { camelKeys, camelList } from "@/lib/supabase/rows";
 import { applyBps, minMoney, multiplyMoney, percentOf } from "@/lib/money";
+import { computeBundleSavings } from "@/lib/bundle-savings";
 import { getStoreSettings } from "@/services/settings";
 import { resolveActiveShippingMethod } from "@/services/shipping";
 
@@ -118,7 +119,7 @@ export async function quoteCart(input: {
     });
   }
   const subtotal = lines.reduce((sum, line) => sum + line.lineTotal, 0);
-  let discountTotal = 0;
+  let discountTotal = await bundleDiscountForCart(lines);
   let discountCode: string | null = null;
   if (input.discountCode) {
     const { data: discountRaw } = await sb()
@@ -138,14 +139,16 @@ export async function quoteCart(input: {
       const underCustomer = customerUses < discount.usagePerCustomer;
       const eligible = discount.scopes.length === 0 || discount.scopes.some((scope) => scope.scope === "ALL");
       if (inWindow && underGlobal && underCustomer && eligible && subtotal >= discount.minimumOrderValue) {
+        let coupon = 0;
         if (discount.type === "PERCENTAGE") {
-          discountTotal = percentOf(subtotal, discount.value);
+          coupon = percentOf(subtotal, discount.value);
         } else if (discount.type === "FIXED_AMOUNT") {
-          discountTotal = minMoney(discount.value, subtotal);
+          coupon = minMoney(discount.value, subtotal);
         }
         if (discount.maximumDiscount != null) {
-          discountTotal = minMoney(discountTotal, discount.maximumDiscount);
+          coupon = minMoney(coupon, discount.maximumDiscount);
         }
+        discountTotal += coupon;
         discountCode = discount.code;
       }
     }
@@ -172,6 +175,7 @@ export async function quoteCart(input: {
     }
     shippingMethod = { id: method.id, name: method.name, price: method.price, freeAbove: method.freeAbove };
   }
+  discountTotal = minMoney(discountTotal, subtotal);
   const taxable = subtotal - discountTotal;
   const taxRateBps = settings.vatEnabled ? settings.defaultTaxRateBps : 0;
   const taxTotal =
@@ -198,4 +202,24 @@ export async function quoteCart(input: {
     pricesIncludeTax: settings.pricesIncludeTax,
     grandTotal,
   };
+}
+
+async function bundleDiscountForCart(lines: QuoteLine[]): Promise<number> {
+  if (!isSupabaseConfigured() || lines.length === 0) return 0;
+  const { data: bundleRows } = await sb().from("bundles").select("id, price").eq("is_active", true);
+  if (!bundleRows?.length) return 0;
+  const offers: { id: string; price: number; items: { variantId: string; quantity: number }[] }[] = [];
+  for (const bundle of bundleRows) {
+    const { data: links } = await sb().from("bundle_items").select("variant_id, quantity").eq("bundle_id", bundle.id);
+    const items = (links ?? []).map((row) => ({
+      variantId: String(row.variant_id),
+      quantity: Number(row.quantity ?? 1),
+    }));
+    if (items.length < 2) continue;
+    offers.push({ id: String(bundle.id), price: Number(bundle.price), items });
+  }
+  return computeBundleSavings(
+    lines.map((line) => ({ variantId: line.variantId, quantity: line.quantity, unitPrice: line.unitPrice })),
+    offers,
+  );
 }

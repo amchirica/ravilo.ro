@@ -50,6 +50,8 @@ const NAV: { titleKey: string; items: NavLink[] }[] = [
     titleKey: "marketingGroup",
     items: [
       { href: "/admin/reduceri", labelKey: "discountsCoupons", permission: "discount.read" },
+      { href: "/admin/pachete", labelKey: "bundles", permission: "bundle.write" },
+      { href: "/admin/best-sellers", labelKey: "bestSellers", permission: "product.write" },
       { href: "/admin/bannere", labelKey: "banners", permission: "content.write" },
       { href: "/admin/newsletter", labelKey: "newsletter", permission: "content.read" },
       { href: "/admin/seo", labelKey: "seo", permission: "content.read" },

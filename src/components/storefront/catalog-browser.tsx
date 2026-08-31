@@ -4,6 +4,7 @@ import { getActiveCategories, getCategoryBySlug, getChildCategories, getEnabledF
 import { ProductGrid } from "@/components/storefront/product-grid";
 import { EmptyState } from "@/components/storefront/empty-state";
 import { Breadcrumb, Button, Container, Field, Input, PageTitle, Select } from "@/components/ui/primitives";
+import { StoreImage } from "@/components/storefront/store-image";
 import { FaqList } from "@/components/storefront/faq-list";
 import { getTranslations } from "next-intl/server";
 import type { AppLocale } from "@/lib/i18n";
@@ -159,7 +160,14 @@ export async function CatalogBrowser({
           ...(category ? [{ label: category.name }] : []),
         ]}
       />
-      <PageTitle title={title} description={description} meta={t("count", { count: total })} className="mt-6" />
+      <div className="mt-6 flex items-end gap-6 md:gap-10">
+        {category?.heroImage ? (
+          <div className="relative size-24 shrink-0 overflow-hidden bg-surface md:size-32">
+            <StoreImage src={category.heroImage} alt={category.name} fill className="object-cover" sizes="128px" />
+          </div>
+        ) : null}
+        <PageTitle title={title} description={description} meta={t("count", { count: total })} className="mb-0 flex-1" />
+      </div>
       {children.length ? (
         <div className="mb-8 flex flex-wrap gap-x-6 gap-y-2">
           {children.map((child) => (

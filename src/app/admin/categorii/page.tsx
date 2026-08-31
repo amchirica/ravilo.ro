@@ -6,8 +6,10 @@ import { writeAudit } from "@/server/audit";
 import { revalidatePath } from "next/cache";
 import { STOREFRONT_CACHE, revalidateStorefrontTag } from "@/lib/storefront-cache";
 import { Field, Input, Textarea, Button } from "@/components/ui/primitives";
+import { AdminImageField } from "@/components/admin/image-field";
 import { slugify } from "@/lib/slug";
 import { z } from "zod";
+import { resolveFormImage } from "@/services/storage";
 
 type CategoryRow = {
   id: string;
@@ -20,6 +22,7 @@ type CategoryRow = {
   sortOrder: number;
   seoTitle: string | null;
   seoDescription: string | null;
+  heroImage: string | null;
 };
 
 const schema = z.object({
@@ -47,7 +50,7 @@ export default async function CategoriesAdmin() {
         <ul className="mt-6 space-y-3">
           {rows.map((category) => (
             <li key={category.id} className="border border-line bg-card p-4">
-              <form action={saveCategory.bind(null, category.id)} className="grid gap-3">
+              <form action={saveCategory.bind(null, category.id)} className="grid gap-3" encType="multipart/form-data">
                 <p className="text-xs uppercase tracking-[0.16em] text-mute">
                   {category.parentId ? `Sub: ${byId.get(category.parentId)?.name ?? "—"}` : "Categorie"} · /categorie/{category.slug}
                 </p>
@@ -60,6 +63,12 @@ export default async function CategoriesAdmin() {
                 <Field label="Descriere">
                   <Textarea name="description" defaultValue={category.description} />
                 </Field>
+                <AdminImageField
+                  label="Imagine de referință"
+                  current={category.heroImage}
+                  square
+                  hint="Pătrat. JPEG, PNG, WebP sau AVIF. Max 8 MB. Se taie central dacă poza nu e pătrată."
+                />
                 <Field label="Părinte">
                   <select name="parentId" defaultValue={category.parentId ?? ""} className="w-full rounded-md border border-line px-3 py-2">
                     <option value="">— rădăcină</option>
@@ -102,7 +111,7 @@ export default async function CategoriesAdmin() {
       </div>
       <div>
         <h2 className="font-serif text-2xl">Categorie nouă</h2>
-        <form action={createCategory} className="mt-4 grid gap-3">
+        <form action={createCategory} className="mt-4 grid gap-3" encType="multipart/form-data">
           <Field label="Nume">
             <Input name="name" required />
           </Field>
@@ -112,6 +121,7 @@ export default async function CategoriesAdmin() {
           <Field label="Descriere">
             <Textarea name="description" />
           </Field>
+          <AdminImageField label="Imagine de referință" square hint="Pătrat. JPEG, PNG, WebP sau AVIF. Max 8 MB." />
           <Field label="Părinte">
             <select name="parentId" className="w-full rounded-md border border-line px-3 py-2">
               <option value="">— rădăcină</option>
@@ -153,6 +163,7 @@ async function createCategory(formData: FormData) {
   "use server";
   const actor = await requirePermission("product.write");
   const parsed = parseCategory(formData);
+  const heroImage = await resolveFormImage(formData, { createdBy: actor.id, folder: "categories" });
   const { data, error } = await sb()
     .from("categories")
     .insert({
@@ -162,6 +173,7 @@ async function createCategory(formData: FormData) {
       parent_id: parsed.parentId ?? null,
       seo_title: parsed.seoTitle || null,
       seo_description: parsed.seoDescription || null,
+      hero_image: heroImage,
       sort_order: Number(parsed.sortOrder ?? 0) || 0,
       is_active: parsed.isActive ?? true,
       is_featured: parsed.isFeatured ?? false,
@@ -171,6 +183,7 @@ async function createCategory(formData: FormData) {
   if (error || !data) throw new Error(error?.message ?? "Nu am putut crea categoria.");
   await writeAudit({ actorUserId: actor.id, action: "category.create", entityType: "Category", entityId: data.id, after: { name: parsed.name } });
   revalidatePath("/categorii");
+  revalidatePath("/");
   revalidatePath("/admin/categorii");
   revalidateStorefrontTag(STOREFRONT_CACHE.categories);
 }
@@ -179,6 +192,7 @@ async function saveCategory(id: string, formData: FormData) {
   "use server";
   const actor = await requirePermission("product.write");
   const parsed = parseCategory(formData);
+  const heroImage = await resolveFormImage(formData, { createdBy: actor.id, folder: "categories" });
   const { error } = await sb()
     .from("categories")
     .update({
@@ -188,6 +202,7 @@ async function saveCategory(id: string, formData: FormData) {
       parent_id: parsed.parentId ?? null,
       seo_title: parsed.seoTitle || null,
       seo_description: parsed.seoDescription || null,
+      hero_image: heroImage,
       sort_order: Number(parsed.sortOrder ?? 0) || 0,
       is_active: parsed.isActive ?? true,
       is_featured: parsed.isFeatured ?? false,
@@ -197,6 +212,7 @@ async function saveCategory(id: string, formData: FormData) {
   if (error) throw new Error(error.message);
   await writeAudit({ actorUserId: actor.id, action: "category.update", entityType: "Category", entityId: id, after: { name: parsed.name } });
   revalidatePath("/categorii");
+  revalidatePath("/");
   revalidatePath("/admin/categorii");
   revalidateStorefrontTag(STOREFRONT_CACHE.categories);
 }
@@ -210,6 +226,7 @@ async function deleteCategory(id: string) {
   if (error) throw new Error(error.message);
   await writeAudit({ actorUserId: actor.id, action: "category.delete", entityType: "Category", entityId: id });
   revalidatePath("/categorii");
+  revalidatePath("/");
   revalidatePath("/admin/categorii");
   revalidateStorefrontTag(STOREFRONT_CACHE.categories);
 }

@@ -1,4 +1,5 @@
 import { StoreFooter, StoreHeader } from "@/components/storefront/chrome";
+import { StoreBanners } from "@/components/storefront/store-banners";
 import { SiteJsonLd } from "@/components/seo/site-json-ld";
 import { StoreToasts } from "@/components/storefront/store-toast";
 import { getTranslations } from "next-intl/server";
@@ -24,6 +25,7 @@ export default async function ShopLayout({
       </a>
       <SiteJsonLd locale={locale} />
       <StoreHeader />
+      <StoreBanners placement="global" variant="strip" />
       <main id="continut" className="flex-1">
         {children}
       </main>

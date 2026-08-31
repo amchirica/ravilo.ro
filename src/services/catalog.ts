@@ -73,6 +73,7 @@ export type PublicBundle = {
   compareAtPrice: number | null;
   imagePath: string | null;
   itemNames: string[];
+  items: { variantId: string; quantity: number }[];
 };
 
 const PRODUCT_SELECT = `
@@ -384,6 +385,10 @@ export async function listPublishedBundles(locale?: AppLocale): Promise<PublicBu
       variantIds.length > 0
         ? await sb().from("product_variants").select("id, product:products(name, name_en)").in("id", variantIds)
         : { data: [] as { id: string; product: { name: string; name_en: string | null } }[] };
+    const bundleItems = (links ?? []).map((row) => ({
+      variantId: String(row.variant_id),
+      quantity: Number(row.quantity ?? 1),
+    }));
     out.push({
       id: bundle.id,
       name: pickLocalized(bundle.name, bundle.nameEn, loc),
@@ -396,6 +401,7 @@ export async function listPublishedBundles(locale?: AppLocale): Promise<PublicBu
         const product = Array.isArray(row.product) ? row.product[0] : row.product;
         return pickLocalized(product?.name, product?.name_en, loc);
       }),
+      items: bundleItems,
     });
   }
   return out;

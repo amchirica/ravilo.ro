@@ -68,6 +68,9 @@ export const HOMEPAGE_SECTION_TYPES = [
   "JOURNAL",
   "NEWSLETTER",
   "CUSTOM_BANNER",
+  "WHY_RAVILO",
+  "REVIEWS",
+  "GUIDES",
 ] as const;
 export type HomepageSectionType = (typeof HOMEPAGE_SECTION_TYPES)[number];
 

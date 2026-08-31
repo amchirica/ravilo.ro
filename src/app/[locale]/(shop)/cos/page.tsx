@@ -10,6 +10,7 @@ import { pickLocalized, type AppLocale } from "@/lib/i18n";
 import { Link } from "@/i18n/routing";
 import { EmptyState } from "@/components/storefront/empty-state";
 import { StoreImage } from "@/components/storefront/store-image";
+import { StoreBanners } from "@/components/storefront/store-banners";
 
 export default async function CartPage() {
   const locale = (await getLocale()) as AppLocale;
@@ -44,7 +45,9 @@ export default async function CartPage() {
   const progress =
     settings.freeShippingThreshold > 0 ? Math.min(100, Math.round((merchandise / settings.freeShippingThreshold) * 100)) : 0;
   return (
-    <Container className="py-12 md:py-16">
+    <>
+      <StoreBanners placement="cart" variant="strip" />
+      <Container className="py-12 md:py-16">
       <PageTitle title={t("title")} />
       {cart.items.length === 0 ? (
         <EmptyState title={t("empty")} hint={t("emptyHint")} actionHref="/produse" actionLabel={tSearch("discover")} />
@@ -133,5 +136,6 @@ export default async function CartPage() {
         </div>
       )}
     </Container>
+    </>
   );
 }

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { redirect as shopRedirect } from "@/i18n/routing";
 import { getLocale } from "next-intl/server";
-import { addToCart, updateCartItem } from "@/services/cart";
+import { addToCart, addBundleToCart, updateCartItem } from "@/services/cart";
 import { createCheckout } from "@/services/checkout";
 import { login, logout, register, requestPasswordReset, resetPassword, verifyEmail } from "@/services/auth";
 import { headers } from "next/headers";
@@ -22,6 +22,13 @@ export async function addToCartAction(formData: FormData) {
   const quantity = Number(formData.get("quantity") ?? 1);
   await addToCart(variantId, quantity);
   revalidatePath("/cos");
+}
+
+export async function addBundleToCartAction(formData: FormData) {
+  const bundleId = String(formData.get("bundleId") ?? "");
+  await addBundleToCart(bundleId);
+  revalidatePath("/cos");
+  revalidatePath("/pachete");
 }
 
 export async function buyNowAction(formData: FormData) {

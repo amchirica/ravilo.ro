@@ -17,6 +17,9 @@ export default async function ContentHub() {
   return (
     <div>
       <AdminHeading k="content" />
+      <p className="mt-2 max-w-xl text-sm text-mute">
+        Pagina de acasă, jurnalul și paginile legale. Datele firmei (CUI, TVA, logo) sunt în Setări magazin.
+      </p>
       <ul className="mt-8 grid gap-3 md:grid-cols-2">
         {links.map((item) => (
           <li key={item.href}>

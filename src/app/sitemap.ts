@@ -37,6 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...localized(appUrl, "/noutati"),
     ...localized(appUrl, "/colectii"),
     ...localized(appUrl, "/best-sellers"),
+    ...localized(appUrl, "/pachete"),
     ...localized(appUrl, "/recenzii"),
     ...localized(appUrl, "/ghiduri"),
     ...localized(appUrl, "/cautare"),

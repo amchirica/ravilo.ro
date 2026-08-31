@@ -6,6 +6,7 @@ import { sanitizeCmsHtml } from "@/lib/sanitize";
 import { pickLocalized, type AppLocale } from "@/lib/i18n";
 import { requestLocale } from "@/lib/request-locale";
 import { STOREFRONT_CACHE, isolateMemo } from "@/lib/storefront-cache";
+import { normalizeBannerPlacement } from "@/lib/banner-placement";
 
 type NavItem = {
   id: string;
@@ -82,32 +83,34 @@ export async function getNavigation(location: "HEADER" | "MOBILE" | "FOOTER") {
     .sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
-async function loadActiveBanners(placement: string) {
+export type StoreBanner = {
+  id: string;
+  title: string;
+  subtitle: string;
+  imagePath: string | null;
+  ctaLabel: string;
+  ctaUrl: string;
+  placement: string;
+  startsAt: Date | null;
+  endsAt: Date | null;
+};
+
+async function loadActiveBanners(placement: string): Promise<StoreBanner[]> {
   if (!isSupabaseConfigured()) return [];
   const now = new Date();
+  const wanted = normalizeBannerPlacement(placement);
   const { data, error } = await sb().from("store_banners").select("*").eq("is_active", true).order("sort_order", { ascending: true });
   if (error) return [];
-  return camelList<{
-    id: string;
-    title: string;
-    subtitle: string;
-    imagePath: string | null;
-    ctaLabel: string;
-    ctaUrl: string;
-    placement: string;
-    startsAt: Date | null;
-    endsAt: Date | null;
-  }>(data).filter((row) => {
-    if (placement && row.placement !== placement && row.placement !== "global") return false;
+  return camelList<StoreBanner>(data).filter((row) => {
+    if (normalizeBannerPlacement(row.placement) !== wanted) return false;
     if (row.startsAt && row.startsAt > now) return false;
     if (row.endsAt && row.endsAt < now) return false;
-    return true;
+    return Boolean(row.title || row.imagePath || row.ctaUrl);
   });
 }
 
-export const getActiveBanners = cache((placement?: string) =>
-  isolateMemo(`${STOREFRONT_CACHE.banners}:${placement ?? ""}`, () => loadActiveBanners(placement ?? "")),
-);
+/** Per-request cache only. Banners must appear as soon as they are saved in admin. */
+export const getActiveBanners = cache((placement: string) => loadActiveBanners(placement));
 
 async function loadActiveAnnouncement() {
   if (!isSupabaseConfigured()) return null;

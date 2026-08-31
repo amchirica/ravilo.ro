@@ -80,12 +80,17 @@ export default async function SettingsPage() {
           <Field label="Prag stoc redus">
             <Input name="lowStockThreshold" type="number" defaultValue={String(settings.lowStockThreshold)} />
           </Field>
-          <Field label="Best sellers">
-            <select name="bestSellerMode" defaultValue={settings.bestSellerMode} className="w-full rounded-md border border-line px-3 py-2">
-              <option value="auto">Auto (comenzi reale)</option>
-              <option value="manual">Manual</option>
-            </select>
-          </Field>
+          <p className="text-sm text-mute">
+            Best sellers și pachete se editează din Marketing, nu din setările firmei:{" "}
+            <a href="/admin/best-sellers" className="underline underline-offset-4">
+              Best Sellers
+            </a>
+            {" · "}
+            <a href="/admin/pachete" className="underline underline-offset-4">
+              Pachete
+            </a>
+            .
+          </p>
         </section>
         <section className="grid gap-4">
           <h2 className="font-serif text-2xl">Announcement bar</h2>
@@ -191,7 +196,7 @@ async function save(formData: FormData) {
     defaultTaxRateBps: Math.round((Number.isFinite(vatPercent) ? vatPercent : 21) * 100),
     orderNumberPrefix: String(formData.get("orderNumberPrefix") ?? current.orderNumberPrefix),
     lowStockThreshold: Number(formData.get("lowStockThreshold") ?? current.lowStockThreshold) || 3,
-    bestSellerMode: String(formData.get("bestSellerMode") ?? current.bestSellerMode) === "manual" ? "manual" : "auto",
+    bestSellerMode: current.bestSellerMode,
     announcementEnabled: formData.get("announcementEnabled") === "on",
     announcementTemplate: String(formData.get("announcementTemplate") ?? current.announcementTemplate),
     announcementTemplateEn: String(formData.get("announcementTemplateEn") ?? current.announcementTemplateEn),

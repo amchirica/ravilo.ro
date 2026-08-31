@@ -121,6 +121,18 @@ export async function addToCart(variantId: string, quantity: number) {
   return getCartView();
 }
 
+export async function addBundleToCart(bundleId: string) {
+  if (!isSupabaseConfigured()) throw new Error("Supabase nu este configurat.");
+  const { data: bundle } = await sb().from("bundles").select("id").eq("id", bundleId).eq("is_active", true).maybeSingle();
+  if (!bundle) throw new Error("Pachetul nu mai este disponibil.");
+  const { data: items } = await sb().from("bundle_items").select("variant_id, quantity").eq("bundle_id", bundleId);
+  if (!items?.length) throw new Error("Pachetul nu are produse.");
+  for (const item of items) {
+    await addToCart(String(item.variant_id), Number(item.quantity ?? 1));
+  }
+  return getCartView();
+}
+
 export async function updateCartItem(variantId: string, quantity: number) {
   const cart = await getOrCreateCart();
   if (quantity <= 0) {

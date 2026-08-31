@@ -38,6 +38,13 @@ export default async function PagesAdmin() {
   return (
     <div>
       <AdminHeading k="pages" />
+      <p className="mt-2 max-w-xl text-sm text-mute">
+        Termeni, retur, livrare, despre — pagini legale. Textul de pe pagina de acasă se editează din{" "}
+        <a href="/admin/continut/homepage" className="underline underline-offset-4">
+          Admin → Pagina de acasă
+        </a>
+        , nu de aici.
+      </p>
       <form action={savePage} className="mt-8 grid max-w-3xl gap-3 border border-line p-5">
         <Field label="Titlu">
           <Input name="title" required />

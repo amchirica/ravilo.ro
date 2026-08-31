@@ -1,6 +1,6 @@
 import { Link } from "@/i18n/routing";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
-import { getActiveHomepageSections, getActiveCategories, getPublishedArticles, localizeHomepageSection, getActiveBanners } from "@/services/cms";
+import { getActiveHomepageSections, getActiveCategories, getPublishedArticles, localizeHomepageSection } from "@/services/cms";
 import { listPublishedCollections } from "@/services/collections";
 import { listBestsellers } from "@/services/bestsellers";
 import { getStoreSettings } from "@/services/settings";
@@ -12,6 +12,9 @@ import { localeAlternates, type AppLocale } from "@/lib/i18n";
 import { NewsletterForm } from "@/components/storefront/newsletter-form";
 import { StoreImage } from "@/components/storefront/store-image";
 import { listApprovedStoreReviews } from "@/services/reviews";
+import { CategoryTile } from "@/components/storefront/category-tile";
+import { AddBundleForm } from "@/components/storefront/add-bundle-form";
+import { StoreBanners } from "@/components/storefront/store-banners";
 import type { Metadata } from "next";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -46,13 +49,12 @@ export default async function HomePage() {
   ]);
   const types = new Set(rawSections.map((section) => section.type));
   const fallbackHome = rawSections.length === 0;
-  const [featured, picks, news, popular, collections, banners, articles, guides, bundles, storeReviews] = await Promise.all([
+  const [featured, picks, news, popular, collections, articles, guides, bundles, storeReviews] = await Promise.all([
     types.has("FEATURED_PRODUCTS") || fallbackHome ? listPublishedProducts({ featured: true, take: 8, locale }) : emptyProducts,
     types.has("RAVILO_PICKS") ? listPublishedProducts({ raviloPick: true, take: 8, locale }) : emptyProducts,
     types.has("NEW_ARRIVALS") ? listPublishedProducts({ isNew: true, take: 8, locale }) : emptyProducts,
     types.has("BESTSELLERS") ? listBestsellers(locale, 8) : [],
     types.has("COLLECTION") ? listPublishedCollections(locale, true) : [],
-    fallbackHome ? [] : getActiveBanners("homepage"),
     types.has("JOURNAL") ? getPublishedArticles(3, locale, "ARTICLE") : [],
     types.has("GUIDES") ? getPublishedArticles(3, locale, "GUIDE") : [],
     types.has("BUNDLE") ? listPublishedBundles(locale) : [],
@@ -63,6 +65,7 @@ export default async function HomePage() {
   if (sections.length === 0) {
     return (
       <div>
+        <StoreBanners placement="homepage" />
         <Hero
           eyebrow={settings.storeName}
           headline={t("home.heroHeadline")}
@@ -90,27 +93,7 @@ export default async function HomePage() {
 
   return (
     <div>
-      {banners.map((banner) => (
-        <section key={banner.id} className="border-b border-line">
-          <Container className="grid items-end gap-10 py-16 md:grid-cols-2 md:py-24">
-            <div>
-              <p className="eyebrow">{settings.storeName}</p>
-              <h2 className="mt-4 font-display text-4xl leading-[1.08] tracking-[-0.03em] md:text-5xl">{banner.title}</h2>
-              {banner.subtitle ? <p className="mt-4 max-w-md text-mute">{banner.subtitle}</p> : null}
-              {banner.ctaUrl ? (
-                <Button href={banner.ctaUrl} className="mt-8">
-                  {banner.ctaLabel || t("home.seeAll")}
-                </Button>
-              ) : null}
-            </div>
-            {banner.imagePath ? (
-              <div className="relative aspect-[4/5] md:aspect-[5/4]">
-                <StoreImage src={banner.imagePath} alt="" fill className="object-cover" sizes="50vw" />
-              </div>
-            ) : null}
-          </Container>
-        </section>
-      ))}
+      <StoreBanners placement="homepage" />
       {sections.map((section) => {
         const content = (section.content ?? {}) as Record<string, unknown>;
         if (section.type === "HERO") {
@@ -119,8 +102,8 @@ export default async function HomePage() {
             <Hero
               key={section.id}
               eyebrow={settings.storeName}
-              headline={String(content.headline ?? section.title ?? t("home.heroHeadline"))}
-              body={String(content.body ?? section.subtitle ?? t("home.heroSubtitle"))}
+              headline={section.title || String(content.headline ?? t("home.heroHeadline"))}
+              body={section.subtitle || String(content.body ?? t("home.heroSubtitle"))}
               primaryHref={ctaHref(content, "cta1", "/produse")}
               primaryLabel={ctaLabel(content, "cta1", t("home.ctaPrimary"))}
               secondaryHref={ctaHref(content, "cta2", "/noutati")}
@@ -211,9 +194,9 @@ export default async function HomePage() {
             <Section key={section.id} className="bg-surface">
               <Container className="grid items-end gap-10 md:grid-cols-2">
                 <div>
-                  <p className="eyebrow">{t("home.featuredBundle")}</p>
+                  <p className="eyebrow">{section.title || t("home.featuredBundle")}</p>
                   <h2 className="mt-4 font-display text-4xl tracking-[-0.03em]">{bundle.name}</h2>
-                  <p className="mt-4 max-w-md text-mute">{bundle.description}</p>
+                  <p className="mt-4 max-w-md text-mute">{bundle.description || section.subtitle}</p>
                   <ul className="mt-6 space-y-1 text-sm text-mute">
                     {bundle.itemNames.map((name) => (
                       <li key={name}>{name}</li>
@@ -221,12 +204,26 @@ export default async function HomePage() {
                   </ul>
                 </div>
                 <div>
+                  {bundle.imagePath ? (
+                    <div className="relative mb-6 aspect-[5/4]">
+                      <StoreImage src={bundle.imagePath} alt="" fill className="object-cover" sizes="50vw" />
+                    </div>
+                  ) : null}
                   <p className="text-3xl tracking-[-0.03em]">
                     {formatMoney(bundle.price, locale)}
                     {bundle.compareAtPrice ? (
                       <span className="ml-3 text-lg text-mute line-through">{formatMoney(bundle.compareAtPrice, locale)}</span>
                     ) : null}
                   </p>
+                  <div className="mt-8 flex flex-wrap items-center gap-4">
+                    {bundle.items.length >= 2 ? (
+                      <AddBundleForm>
+                        <input type="hidden" name="bundleId" value={bundle.id} />
+                        <Button type="submit">{t("home.addBundle")}</Button>
+                      </AddBundleForm>
+                    ) : null}
+                    <TextLink href="/pachete">{t("home.seeAll")}</TextLink>
+                  </div>
                 </div>
               </Container>
             </Section>
@@ -434,23 +431,21 @@ function CategoryStrip({
   categories,
 }: {
   title: string;
-  categories: { id: string; slug: string; name: string }[];
+  categories: { id: string; slug: string; name: string; heroImage?: string | null }[];
 }) {
   if (!categories.length) return null;
   return (
     <Section>
       <Container>
         <SectionHeader title={title} />
-        <div className="grid grid-cols-2 gap-px bg-line md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-4 md:gap-x-8 md:gap-y-14">
           {categories.map((category) => (
-            <Link
-              prefetch={false}
+            <CategoryTile
               key={category.id}
               href={`/categorie/${category.slug}`}
-              className="bg-paper px-5 py-12 text-lg tracking-[-0.03em] transition-colors duration-200 hover:bg-surface md:py-16"
-            >
-              {category.name}
-            </Link>
+              name={category.name}
+              image={category.heroImage}
+            />
           ))}
         </div>
       </Container>

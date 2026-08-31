@@ -21,7 +21,7 @@ export function AdminPreviewBar() {
         EN
       </button>
       <p className="w-full text-[11px] font-sans normal-case tracking-normal text-mute">
-        Preview {theme} / {locale}. Conținutul publicat este același în ambele teme.
+        Previzualizare {theme} / {locale} în admin. Textul de mai jos este pagina de acasă, nu setările magazinului.
       </p>
     </div>
   );

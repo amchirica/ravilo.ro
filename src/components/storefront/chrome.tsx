@@ -120,6 +120,9 @@ export async function StoreFooter() {
           <Link prefetch={false} href="/best-sellers" className={linkClass}>
             {t("nav.bestSellers")}
           </Link>
+          <Link prefetch={false} href="/pachete" className={linkClass}>
+            {t("nav.bundles")}
+          </Link>
           <Link prefetch={false} href="/categorii" className={linkClass}>
             {t("nav.allCategories")}
           </Link>

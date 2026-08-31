@@ -2,6 +2,8 @@ import { Link } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getActiveCategories, getChildCategories } from "@/services/cms";
 import { Container, PageTitle } from "@/components/ui/primitives";
+import { CategoryTile } from "@/components/storefront/category-tile";
+import { StoreBanners } from "@/components/storefront/store-banners";
 import { localeAlternates, type AppLocale } from "@/lib/i18n";
 import type { Metadata } from "next";
 
@@ -29,20 +31,20 @@ export default async function CategoriesIndexPage({ params }: { params: Promise<
     })),
   );
   return (
-    <Container className="py-12 md:py-16">
+    <>
+      <StoreBanners placement="category" />
+      <Container className="py-12 md:py-16">
       <PageTitle title={t("categories")} />
-      <div className="grid gap-12 md:grid-cols-2">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-3 md:gap-x-8 md:gap-y-16">
         {withChildren.map((category) => (
           <article key={category.id}>
-            <Link href={`/categorie/${category.slug}`} className="font-display text-3xl tracking-[-0.03em] hover:text-mute">
-              {category.name}
-            </Link>
-            <p className="mt-3 text-sm text-mute">{category.description}</p>
+            <CategoryTile href={`/categorie/${category.slug}`} name={category.name} image={category.heroImage} />
+            {category.description ? <p className="mt-2 text-sm leading-relaxed text-mute">{category.description}</p> : null}
             {category.children.length ? (
               <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
                 {category.children.map((child) => (
                   <li key={child.id}>
-                    <Link href={`/categorie/${child.slug}`} className="text-sm text-mute hover:text-ink">
+                    <Link prefetch={false} href={`/categorie/${child.slug}`} className="text-sm text-mute hover:text-ink">
                       {child.name}
                     </Link>
                   </li>
@@ -53,5 +55,6 @@ export default async function CategoriesIndexPage({ params }: { params: Promise<
         ))}
       </div>
     </Container>
+    </>
   );
 }

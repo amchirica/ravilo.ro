@@ -5,6 +5,7 @@ export function AdminImageField({
   keepName = "imageKeep",
   removeName = "imageRemove",
   hint = "JPEG, PNG, WebP sau AVIF. Max 8 MB. Încarcă fișierul, nu un URL.",
+  square = false,
 }: {
   label?: string;
   current?: string | null;
@@ -12,15 +13,28 @@ export function AdminImageField({
   keepName?: string;
   removeName?: string;
   hint?: string;
+  square?: boolean;
 }) {
   return (
     <div className="space-y-2">
       <p className="text-[0.8125rem] text-mute">{label}</p>
       {current ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={current} alt="" className="h-36 w-full max-w-xs object-cover" />
+        <img
+          src={current}
+          alt=""
+          className={square ? "aspect-square w-36 object-cover" : "h-36 w-full max-w-xs object-cover"}
+        />
       ) : (
-        <div className="flex h-36 max-w-xs items-center bg-surface px-4 text-sm text-mute">Nicio imagine</div>
+        <div
+          className={
+            square
+              ? "flex aspect-square w-36 items-center justify-center bg-surface px-3 text-center text-sm text-mute"
+              : "flex h-36 max-w-xs items-center bg-surface px-4 text-sm text-mute"
+          }
+        >
+          Nicio imagine
+        </div>
       )}
       <input type="hidden" name={keepName} value={current ?? ""} />
       <input

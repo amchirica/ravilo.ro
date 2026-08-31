@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getCategoryBySlug } from "@/services/cms";
 import { CatalogBrowser } from "@/components/storefront/catalog-browser";
+import { StoreBanners } from "@/components/storefront/store-banners";
 import { localeAlternates, type AppLocale } from "@/lib/i18n";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string; locale: string }> }): Promise<Metadata> {
@@ -34,7 +35,9 @@ export default async function CategoryPage({
   const category = await getCategoryBySlug(slug, locale);
   if (!category) notFound();
   return (
-    <CatalogBrowser
+    <>
+      <StoreBanners placement="category" />
+      <CatalogBrowser
       locale={locale}
       query={query}
       categorySlug={slug}
@@ -42,5 +45,6 @@ export default async function CategoryPage({
       description={category.description || t("seeCategory")}
       seoContent={category.seoContent || undefined}
     />
+    </>
   );
 }
