@@ -22,9 +22,13 @@ export function sb(): SupabaseClient {
       "Supabase nu este configurat. Completează NEXT_PUBLIC_SUPABASE_URL și SUPABASE_SERVICE_ROLE_KEY în .env.local (din Dashboard → Settings → API).",
     );
   }
-  return createClient(url, key, {
+  const existing = (globalThis as { __raviloSb?: SupabaseClient }).__raviloSb;
+  if (existing) return existing;
+  const client = createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  (globalThis as { __raviloSb?: SupabaseClient }).__raviloSb = client;
+  return client;
 }
 
 export async function listRows<T>(

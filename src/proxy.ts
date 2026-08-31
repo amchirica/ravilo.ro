@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { applyLocaleRouting } from "@/lib/intl-proxy";
 import { safeInternalPath } from "@/lib/redirect";
+import { hasAdminAuthCookie, hasShopAuthCookie } from "@/lib/supabase/auth-scope";
 import { copyResponseCookies, createMiddlewareSupabase, isPublicAdminPath } from "@/lib/supabase/middleware";
 
 function withoutLocale(pathname: string) {
@@ -12,6 +13,10 @@ function withoutLocale(pathname: string) {
 
 function redirectWithCookies(url: URL, source: NextResponse) {
   return copyResponseCookies(source, NextResponse.redirect(url));
+}
+
+function passThrough(request: NextRequest, requestHeaders: Headers) {
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 async function sessionUser(
@@ -33,10 +38,8 @@ export async function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-ravilo-pathname", pathname);
 
-  if (pathname.startsWith("/api") || pathname.startsWith("/admin")) {
-    const scope = pathname.startsWith("/admin") ? "admin" : "shop";
-    const { user, response } = await sessionUser(request, requestHeaders, undefined, scope);
-    if (pathname.startsWith("/api") && ["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+  if (pathname.startsWith("/api")) {
+    if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
       const isWebhook = pathname.startsWith("/api/webhooks/") || pathname.startsWith("/api/payments/mock/");
       const isCron = pathname.startsWith("/api/cron/");
       if (!isWebhook && !isCron) {
@@ -52,7 +55,21 @@ export async function proxy(request: NextRequest) {
         }
       }
     }
-    if (pathname.startsWith("/admin") && !isPublicAdminPath(pathname) && !user) {
+    return passThrough(request, requestHeaders);
+  }
+
+  if (pathname.startsWith("/admin")) {
+    const cookies = request.cookies.getAll();
+    if (!isPublicAdminPath(pathname) && !hasAdminAuthCookie(cookies)) {
+      const login = new URL("/admin/login", request.url);
+      login.searchParams.set("next", safeInternalPath(pathname, "/admin"));
+      return NextResponse.redirect(login);
+    }
+    if (!hasAdminAuthCookie(cookies)) {
+      return passThrough(request, requestHeaders);
+    }
+    const { user, response } = await sessionUser(request, requestHeaders, undefined, "admin");
+    if (!isPublicAdminPath(pathname) && !user) {
       const login = new URL("/admin/login", request.url);
       login.searchParams.set("next", safeInternalPath(pathname, "/admin"));
       return redirectWithCookies(login, response);
@@ -61,10 +78,18 @@ export async function proxy(request: NextRequest) {
   }
 
   const intlResponse = applyLocaleRouting(request);
-  const { user, response } = await sessionUser(request, requestHeaders, intlResponse, "shop");
-  const prefix = pathname.startsWith("/en") ? "/en" : "";
+  const needsShopAuth = path === "/cont" || path.startsWith("/cont/");
+  if (!needsShopAuth) return intlResponse;
 
-  if (["/cont"].some((item) => path === item || path.startsWith(`${item}/`)) && !user) {
+  const prefix = pathname.startsWith("/en") ? "/en" : "";
+  if (!hasShopAuthCookie(request.cookies.getAll())) {
+    const login = new URL(`${prefix}/auth/login`, request.url);
+    login.searchParams.set("next", safeInternalPath(pathname, prefix ? `${prefix}/cont` : "/cont"));
+    return redirectWithCookies(login, intlResponse);
+  }
+
+  const { user, response } = await sessionUser(request, requestHeaders, intlResponse, "shop");
+  if (!user) {
     const login = new URL(`${prefix}/auth/login`, request.url);
     login.searchParams.set("next", safeInternalPath(pathname, prefix ? `${prefix}/cont` : "/cont"));
     return redirectWithCookies(login, response);

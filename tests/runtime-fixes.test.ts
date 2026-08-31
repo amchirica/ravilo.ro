@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { postAuthPath } from "../src/lib/redirect";
-import { authScopeFromRequest, cookiesForScope } from "../src/lib/supabase/auth-scope";
+import { authScopeFromRequest, cookiesForScope, hasAdminAuthCookie, hasShopAuthCookie } from "../src/lib/supabase/auth-scope";
 import { sanitizeCmsHtml } from "../src/lib/sanitize";
 import {
   getServerWishlistSnapshot,
@@ -36,6 +36,10 @@ describe("auth cookie scopes", () => {
       "ravilo-admin-auth",
       "ravilo-admin-auth.0",
     ]);
+    expect(hasShopAuthCookie(all)).toBe(true);
+    expect(hasAdminAuthCookie(all)).toBe(true);
+    expect(hasShopAuthCookie([{ name: "ravilo-admin-auth" }])).toBe(false);
+    expect(hasAdminAuthCookie([{ name: "sb-demo-auth-token" }])).toBe(false);
   });
 
   it("treats admin routes as a separate auth scope", () => {

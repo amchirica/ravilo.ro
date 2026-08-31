@@ -26,6 +26,7 @@ export function FileUploadForm({
         <input
           ref={inputRef}
           type="file"
+          name="file"
           required
           accept={accept}
           className="text-sm"

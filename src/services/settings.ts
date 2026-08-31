@@ -1,8 +1,10 @@
 import "server-only";
+import { cache } from "react";
 import { isSupabaseConfigured, sb } from "@/lib/supabase/db";
+import { STOREFRONT_CACHE, isolateMemo, revalidateStorefrontTag } from "@/lib/storefront-cache";
 import { defaultStoreSettings, storeSettingsSchema, type StoreSettings } from "@/schemas/settings";
 
-export async function getStoreSettings(): Promise<StoreSettings> {
+async function loadStoreSettings(): Promise<StoreSettings> {
   if (!isSupabaseConfigured()) return defaultStoreSettings();
   try {
     const { data, error } = await sb().from("store_settings").select("data").eq("id", "default").maybeSingle();
@@ -12,6 +14,8 @@ export async function getStoreSettings(): Promise<StoreSettings> {
     return defaultStoreSettings();
   }
 }
+
+export const getStoreSettings = cache(() => isolateMemo(STOREFRONT_CACHE.settings, loadStoreSettings));
 
 export async function saveStoreSettings(data: StoreSettings, actorUserId?: string) {
   const parsed = storeSettingsSchema.parse(data);
@@ -24,6 +28,7 @@ export async function saveStoreSettings(data: StoreSettings, actorUserId?: strin
       updated_at: new Date().toISOString(),
     });
   if (error) throw new Error(error.message);
+  revalidateStorefrontTag(STOREFRONT_CACHE.settings);
   return parsed;
 }
 

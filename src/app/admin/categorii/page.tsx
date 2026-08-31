@@ -4,6 +4,7 @@ import { sb } from "@/lib/supabase/db";
 import { camelList } from "@/lib/supabase/rows";
 import { writeAudit } from "@/server/audit";
 import { revalidatePath } from "next/cache";
+import { STOREFRONT_CACHE, revalidateStorefrontTag } from "@/lib/storefront-cache";
 import { Field, Input, Textarea, Button } from "@/components/ui/primitives";
 import { slugify } from "@/lib/slug";
 import { z } from "zod";
@@ -171,6 +172,7 @@ async function createCategory(formData: FormData) {
   await writeAudit({ actorUserId: actor.id, action: "category.create", entityType: "Category", entityId: data.id, after: { name: parsed.name } });
   revalidatePath("/categorii");
   revalidatePath("/admin/categorii");
+  revalidateStorefrontTag(STOREFRONT_CACHE.categories);
 }
 
 async function saveCategory(id: string, formData: FormData) {
@@ -196,6 +198,7 @@ async function saveCategory(id: string, formData: FormData) {
   await writeAudit({ actorUserId: actor.id, action: "category.update", entityType: "Category", entityId: id, after: { name: parsed.name } });
   revalidatePath("/categorii");
   revalidatePath("/admin/categorii");
+  revalidateStorefrontTag(STOREFRONT_CACHE.categories);
 }
 
 async function deleteCategory(id: string) {
@@ -208,4 +211,5 @@ async function deleteCategory(id: string) {
   await writeAudit({ actorUserId: actor.id, action: "category.delete", entityType: "Category", entityId: id });
   revalidatePath("/categorii");
   revalidatePath("/admin/categorii");
+  revalidateStorefrontTag(STOREFRONT_CACHE.categories);
 }

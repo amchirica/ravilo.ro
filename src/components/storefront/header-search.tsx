@@ -120,6 +120,7 @@ export function HeaderSearch() {
                             <li key={hit.href}>
                               <Link
                                 href={hit.href}
+                                prefetch={false}
                                 className="block py-2.5 text-lg tracking-[-0.02em] hover:text-mute"
                                 onClick={() => setOverlay(false)}
                               >

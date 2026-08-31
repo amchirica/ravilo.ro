@@ -3,9 +3,12 @@ import { AdminHeading } from "@/components/admin/admin-heading";
 import { listRows, sb } from "@/lib/supabase/db";
 import { writeAudit } from "@/server/audit";
 import { revalidatePath } from "next/cache";
+import { STOREFRONT_CACHE, revalidateStorefrontTag } from "@/lib/storefront-cache";
 import { Field, Input, Button } from "@/components/ui/primitives";
+import { AdminImageField } from "@/components/admin/image-field";
 import { AdminPreviewBar } from "@/components/admin/preview-bar";
 import { translationMissing } from "@/lib/i18n";
+import { resolveFormImage } from "@/services/storage";
 
 type Section = {
   id: string;
@@ -54,7 +57,7 @@ export default async function HomepageAdmin() {
                 <button className="text-sm underline">{section.isEnabled ? "Dezactivează" : "Activează"}</button>
               </form>
             </div>
-            <form action={saveSection.bind(null, section.id)} className="mt-4 grid gap-3 md:grid-cols-2">
+            <form action={saveSection.bind(null, section.id)} className="mt-4 grid gap-3 md:grid-cols-2" encType="multipart/form-data">
               <Field label="Titlu RO">
                 <Input name="title" defaultValue={section.title ?? ""} />
               </Field>
@@ -84,10 +87,15 @@ export default async function HomepageAdmin() {
                   <Field label="CTA 2 href">
                     <Input name="cta2Href" defaultValue={content.cta2?.href ?? "/categorii"} />
                   </Field>
-                  <Field label="Imagine hero (URL)">
-                    <Input name="image" defaultValue={content.image ?? ""} />
-                  </Field>
+                  <div className="md:col-span-2">
+                    <AdminImageField label="Imagine hero" current={typeof content.image === "string" ? content.image : null} />
+                  </div>
                 </>
+              ) : null}
+              {section.type === "CUSTOM_BANNER" ? (
+                <div className="md:col-span-2">
+                  <AdminImageField label="Imagine banner" current={typeof content.image === "string" ? content.image : null} />
+                </div>
               ) : null}
               <div className="md:col-span-2">
                 <Button type="submit" variant="line">
@@ -111,6 +119,7 @@ async function toggleSection(id: string, isEnabled: boolean) {
   revalidatePath("/");
   revalidatePath("/en");
   revalidatePath("/admin/continut/homepage");
+  revalidateStorefrontTag(STOREFRONT_CACHE.homepage);
 }
 
 async function saveSection(id: string, formData: FormData) {
@@ -123,6 +132,13 @@ async function saveSection(id: string, formData: FormData) {
   const sortOrder = Number(formData.get("sortOrder") ?? 0) || 0;
   const { data: existing } = await sb().from("homepage_sections").select("content").eq("id", id).maybeSingle();
   const previous = (existing?.content ?? {}) as Record<string, unknown>;
+  const image = formData.has("imageKeep")
+    ? await resolveFormImage(formData, {
+        createdBy: actor.id,
+        folder: "homepage",
+        current: typeof previous.image === "string" ? previous.image : null,
+      })
+    : ((previous.image as string | undefined) ?? null);
   const content = {
     ...previous,
     cta1: {
@@ -133,7 +149,7 @@ async function saveSection(id: string, formData: FormData) {
       label: String(formData.get("cta2Label") ?? "") || (previous.cta2 as { label?: string } | undefined)?.label,
       href: String(formData.get("cta2Href") ?? "") || (previous.cta2 as { href?: string } | undefined)?.href,
     },
-    image: String(formData.get("image") ?? "") || (previous.image as string | undefined),
+    image,
   };
   await sb()
     .from("homepage_sections")
@@ -157,4 +173,5 @@ async function saveSection(id: string, formData: FormData) {
   revalidatePath("/");
   revalidatePath("/en");
   revalidatePath("/admin/continut/homepage");
+  revalidateStorefrontTag(STOREFRONT_CACHE.homepage);
 }

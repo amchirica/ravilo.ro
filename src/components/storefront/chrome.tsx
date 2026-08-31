@@ -47,7 +47,7 @@ export async function StoreHeader() {
     <div className={barClass}>
       <Container className="py-2 text-center text-[0.6875rem] tracking-[0.14em]">
         {announcementLink ? (
-          <Link href={announcementLink} className="underline-offset-4 hover:underline">
+          <Link prefetch={false} href={announcementLink} className="underline-offset-4 hover:underline">
             {announcementText}
           </Link>
         ) : (
@@ -73,13 +73,13 @@ export async function StoreHeader() {
           <Suspense>
             <HeaderSearch />
           </Suspense>
-          <Link href="/cont" prefetch={false} aria-label={t("account")} className={iconClass}>
+          <Link prefetch={false} href="/cont" aria-label={t("account")} className={iconClass}>
             <User size={18} strokeWidth={1.5} />
           </Link>
-          <Link href="/favorite" aria-label={t("wishlist")} className={iconClass}>
+          <Link prefetch={false} href="/favorite" aria-label={t("wishlist")} className={iconClass}>
             <Heart size={18} strokeWidth={1.5} />
           </Link>
-          <Link href="/cos" aria-label={t("cart")} className={iconClass}>
+          <Link prefetch={false} href="/cos" aria-label={t("cart")} className={iconClass}>
             <ShoppingBag size={18} strokeWidth={1.5} />
           </Link>
         </div>
@@ -108,64 +108,64 @@ export async function StoreFooter() {
         </div>
         <nav className="grid gap-3 md:col-span-2" aria-label={t("nav.shop")}>
           <p className="eyebrow">{t("nav.shop")}</p>
-          <Link href="/produse" className={linkClass}>
+          <Link prefetch={false} href="/produse" className={linkClass}>
             {t("nav.products")}
           </Link>
-          <Link href="/noutati" className={linkClass}>
+          <Link prefetch={false} href="/noutati" className={linkClass}>
             {t("nav.newArrivals")}
           </Link>
-          <Link href="/colectii" className={linkClass}>
+          <Link prefetch={false} href="/colectii" className={linkClass}>
             {t("nav.collections")}
           </Link>
-          <Link href="/best-sellers" className={linkClass}>
+          <Link prefetch={false} href="/best-sellers" className={linkClass}>
             {t("nav.bestSellers")}
           </Link>
-          <Link href="/categorii" className={linkClass}>
+          <Link prefetch={false} href="/categorii" className={linkClass}>
             {t("nav.allCategories")}
           </Link>
         </nav>
         <nav className="grid gap-3 md:col-span-2" aria-label={t("nav.help")}>
           <p className="eyebrow">{t("nav.help")}</p>
-          <Link href="/contact" className={linkClass}>
+          <Link prefetch={false} href="/contact" className={linkClass}>
             {t("nav.contact")}
           </Link>
-          <Link href="/faq" className={linkClass}>
+          <Link prefetch={false} href="/faq" className={linkClass}>
             {t("nav.faq")}
           </Link>
-          <Link href="/livrare" className={linkClass}>
+          <Link prefetch={false} href="/livrare" className={linkClass}>
             {t("nav.shipping")}
           </Link>
-          <Link href="/retur" className={linkClass}>
+          <Link prefetch={false} href="/retur" className={linkClass}>
             {t("nav.returns")}
           </Link>
-          <Link href="/urmareste-comanda" className={linkClass}>
+          <Link prefetch={false} href="/urmareste-comanda" className={linkClass}>
             {t("nav.trackOrder")}
           </Link>
         </nav>
         <nav className="grid gap-3 md:col-span-2" aria-label={t("nav.discover")}>
           <p className="eyebrow">{t("nav.discover")}</p>
-          <Link href="/blog" className={linkClass}>
+          <Link prefetch={false} href="/blog" className={linkClass}>
             {t("nav.journal")}
           </Link>
-          <Link href="/ghiduri" className={linkClass}>
+          <Link prefetch={false} href="/ghiduri" className={linkClass}>
             {t("nav.guides")}
           </Link>
-          <Link href="/despre" className={linkClass}>
+          <Link prefetch={false} href="/despre" className={linkClass}>
             {t("nav.about")}
           </Link>
-          <Link href="/recenzii" className={linkClass}>
+          <Link prefetch={false} href="/recenzii" className={linkClass}>
             {t("nav.reviews")}
           </Link>
         </nav>
         <nav className="grid gap-3 md:col-span-2" aria-label={t("nav.legal")}>
           <p className="eyebrow">{t("nav.legal")}</p>
-          <Link href="/termeni" className={linkClass}>
+          <Link prefetch={false} href="/termeni" className={linkClass}>
             {t("nav.terms")}
           </Link>
-          <Link href="/confidentialitate" className={linkClass}>
+          <Link prefetch={false} href="/confidentialitate" className={linkClass}>
             {t("nav.privacy")}
           </Link>
-          <Link href="/cookies" className={linkClass}>
+          <Link prefetch={false} href="/cookies" className={linkClass}>
             {t("nav.cookies")}
           </Link>
           <a href="https://anpc.ro" rel="noopener noreferrer" target="_blank" className={linkClass}>

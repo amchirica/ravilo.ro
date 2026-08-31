@@ -4,9 +4,11 @@ import { getStoreSettings, saveStoreSettings } from "@/services/settings";
 import { storeSettingsSchema } from "@/schemas/settings";
 import { writeAudit } from "@/server/audit";
 import { Field, Input, Textarea, Button } from "@/components/ui/primitives";
+import { AdminImageField } from "@/components/admin/image-field";
 import { parseRonToBani, formatRon } from "@/lib/money";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { resolveFormImage } from "@/services/storage";
 
 export default async function SettingsPage() {
   const actor = await requirePermission("settings.write");
@@ -15,7 +17,7 @@ export default async function SettingsPage() {
   return (
     <div className="max-w-2xl">
       <AdminHeading k="storeSettings" />
-      <form action={save} className="mt-8 grid gap-8">
+      <form action={save} className="mt-8 grid gap-8" encType="multipart/form-data">
         <section className="grid gap-4">
           <h2 className="font-serif text-2xl">Identitate</h2>
           <Field label="Nume magazin">
@@ -24,12 +26,8 @@ export default async function SettingsPage() {
           <Field label="Tagline">
             <Input name="tagline" defaultValue={settings.tagline} />
           </Field>
-          <Field label="Logo path">
-            <Input name="logoPath" defaultValue={settings.logoPath} />
-          </Field>
-          <Field label="Favicon path">
-            <Input name="faviconPath" defaultValue={settings.faviconPath} />
-          </Field>
+          <AdminImageField label="Logo" current={settings.logoPath} fileName="logo" keepName="logoKeep" removeName="logoRemove" />
+          <AdminImageField label="Favicon" current={settings.faviconPath} fileName="favicon" keepName="faviconKeep" removeName="faviconRemove" />
         </section>
         <section className="grid gap-4">
           <h2 className="font-serif text-2xl">Companie</h2>
@@ -136,9 +134,7 @@ export default async function SettingsPage() {
           <Field label="Meta description implicit">
             <Textarea name="defaultSeoDescription" defaultValue={settings.defaultSeoDescription} />
           </Field>
-          <Field label="OG image">
-            <Input name="defaultOgImage" defaultValue={settings.defaultOgImage} />
-          </Field>
+          <AdminImageField label="Imagine Open Graph" current={settings.defaultOgImage} fileName="ogImage" keepName="ogKeep" removeName="ogRemove" />
         </section>
         <Button type="submit">Salvează</Button>
       </form>
@@ -151,12 +147,36 @@ async function save(formData: FormData) {
   const actor = await requirePermission("settings.write");
   const current = await getStoreSettings();
   const vatPercent = Number(String(formData.get("vatPercent") ?? current.defaultTaxRateBps / 100));
+  const logoPath = (await resolveFormImage(formData, {
+    createdBy: actor.id,
+    folder: "brand",
+    current: current.logoPath,
+    fileField: "logo",
+    keepField: "logoKeep",
+    removeField: "logoRemove",
+  })) || "/ravilo.png";
+  const faviconPath = (await resolveFormImage(formData, {
+    createdBy: actor.id,
+    folder: "brand",
+    current: current.faviconPath,
+    fileField: "favicon",
+    keepField: "faviconKeep",
+    removeField: "faviconRemove",
+  })) || "/favicon.ico";
+  const defaultOgImage = (await resolveFormImage(formData, {
+    createdBy: actor.id,
+    folder: "brand",
+    current: current.defaultOgImage,
+    fileField: "ogImage",
+    keepField: "ogKeep",
+    removeField: "ogRemove",
+  })) || "/ravilo.png";
   const next = storeSettingsSchema.parse({
     ...current,
     storeName: String(formData.get("storeName") ?? current.storeName),
     tagline: String(formData.get("tagline") ?? current.tagline),
-    logoPath: String(formData.get("logoPath") ?? current.logoPath),
-    faviconPath: String(formData.get("faviconPath") ?? current.faviconPath),
+    logoPath,
+    faviconPath,
     companyName: String(formData.get("companyName") ?? ""),
     cui: String(formData.get("cui") ?? ""),
     registrationNumber: String(formData.get("registrationNumber") ?? ""),
@@ -180,7 +200,7 @@ async function save(formData: FormData) {
     siteName: String(formData.get("siteName") ?? current.siteName),
     defaultSeoTitle: String(formData.get("defaultSeoTitle") ?? current.defaultSeoTitle),
     defaultSeoDescription: String(formData.get("defaultSeoDescription") ?? current.defaultSeoDescription),
-    defaultOgImage: String(formData.get("defaultOgImage") ?? current.defaultOgImage),
+    defaultOgImage,
     social: {
       instagram: String(formData.get("instagram") ?? ""),
       facebook: String(formData.get("facebook") ?? ""),

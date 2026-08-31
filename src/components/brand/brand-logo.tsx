@@ -40,13 +40,13 @@ export function BrandLogo({
   const classes = cn("inline-flex shrink-0 items-center", className);
   if (href.startsWith("/admin")) {
     return (
-      <NextLink href={href} className={classes} aria-label="RAVILO">
+      <NextLink href={href} prefetch={false} className={classes} aria-label="RAVILO">
         {image}
       </NextLink>
     );
   }
   return (
-    <LocaleLink href={href} className={classes} aria-label="RAVILO">
+    <LocaleLink href={href} prefetch={false} className={classes} aria-label="RAVILO">
       {image}
     </LocaleLink>
   );

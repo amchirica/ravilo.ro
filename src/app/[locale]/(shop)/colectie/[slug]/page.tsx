@@ -1,13 +1,10 @@
 import { notFound } from "next/navigation";
 import { getPublishedCollection } from "@/services/collections";
 import { listPublishedProducts } from "@/services/catalog";
-import { getEnabledFaqs, getPublishedArticles } from "@/services/cms";
 import { ProductGrid } from "@/components/storefront/product-grid";
 import { EmptyState } from "@/components/storefront/empty-state";
-import { Container } from "@/components/ui/primitives";
+import { Breadcrumb, Container, Section, SectionHeader } from "@/components/ui/primitives";
 import { StoreImage } from "@/components/storefront/store-image";
-import { FaqList } from "@/components/storefront/faq-list";
-import { Link } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { localeAlternates, type AppLocale } from "@/lib/i18n";
 import type { Metadata } from "next";
@@ -21,6 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: collection.seoTitle ?? collection.name,
     description: collection.seoDescription ?? collection.description,
     alternates: localeAlternates(`/colectie/${collection.slug}`, locale as AppLocale, process.env.APP_URL ?? "http://localhost:3000"),
+    openGraph: collection.imagePath ? { images: [collection.imagePath] } : undefined,
   };
 }
 
@@ -29,46 +27,64 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
   setRequestLocale(localeParam);
   const locale = localeParam as AppLocale;
   const t = await getTranslations("catalog");
+  const tNav = await getTranslations("nav");
   const collection = await getPublishedCollection(slug, locale);
   if (!collection) notFound();
-  const [{ items }, faqs, guides] = await Promise.all([
-    listPublishedProducts({ collectionSlug: slug, take: 48, locale }),
-    getEnabledFaqs(locale, { global: true }),
-    getPublishedArticles(3, locale, "GUIDE"),
-  ]);
+  const { items } = await listPublishedProducts({ collectionSlug: slug, take: 48, locale });
   return (
     <article>
-      {collection.imagePath ? (
-        <div className="relative aspect-[16/7] w-full bg-surface md:aspect-[21/8]">
-          <StoreImage src={collection.imagePath} alt="" fill className="object-cover" sizes="100vw" priority />
-        </div>
-      ) : null}
-      <Container className="py-16">
-        <p className="eyebrow">{t("collectionsTitle")}</p>
-        <h1 className="mt-3 font-display text-5xl">{collection.name}</h1>
-        {collection.description ? <p className="mt-4 max-w-2xl text-lg text-mute">{collection.description}</p> : null}
-        <div className="mt-10">
-          {items.length ? <ProductGrid products={items} /> : <EmptyState title={t("emptyCollection")} />}
-        </div>
-        {collection.editorialHtml ? (
-          <div className="prose-ravilo mt-16 max-w-2xl text-ink-2" dangerouslySetInnerHTML={{ __html: collection.editorialHtml }} />
-        ) : null}
-        {guides.length ? (
-          <section className="mt-16">
-            <h2 className="font-display text-3xl">{t("guidesAndArticles")}</h2>
-            <ul className="mt-4 grid gap-3">
-              {guides.map((guide) => (
-                <li key={guide.id}>
-                  <Link href={guide.href} className="text-mute hover:text-ink">
-                    {guide.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
-        <FaqList items={faqs} title="FAQ" />
+      <Container className="pt-8 md:pt-10">
+        <Breadcrumb
+          items={[
+            { href: "/", label: "RAVILO" },
+            { href: "/colectii", label: t("collectionsTitle") },
+            { label: collection.name },
+          ]}
+        />
       </Container>
+      <section>
+        <Container className="grid items-end gap-10 py-10 md:grid-cols-12 md:gap-12 md:py-16 lg:py-20">
+          <div className="md:col-span-5">
+            <p className="eyebrow">{t("collectionsTitle")}</p>
+            <h1 className="mt-4 font-display text-[clamp(2.4rem,5vw,4.5rem)] leading-[0.95] tracking-[-0.04em]">
+              {collection.name}
+            </h1>
+            {collection.description ? (
+              <p className="mt-5 max-w-md text-[1.05rem] leading-relaxed text-mute">{collection.description}</p>
+            ) : null}
+            <p className="mt-6 text-[0.6875rem] uppercase tracking-[0.16em] text-mute">{t("count", { count: items.length })}</p>
+          </div>
+          <div className="relative aspect-[4/5] bg-surface md:col-span-7 md:aspect-[5/4]">
+            {collection.imagePath ? (
+              <StoreImage
+                src={collection.imagePath}
+                alt={collection.name}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 58vw"
+                priority
+              />
+            ) : null}
+          </div>
+        </Container>
+      </section>
+      {collection.editorialHtml ? (
+        <section className="border-y border-line">
+          <Container className="py-16 md:py-20">
+            <div className="prose-ravilo max-w-2xl text-mute" dangerouslySetInnerHTML={{ __html: collection.editorialHtml }} />
+          </Container>
+        </section>
+      ) : null}
+      <Section>
+        <Container>
+          <SectionHeader title={tNav("products")} subtitle={t("count", { count: items.length })} />
+          {items.length ? (
+            <ProductGrid products={items} />
+          ) : (
+            <EmptyState title={t("emptyCollection")} hint={t("emptyCollectionHint")} actionHref="/produse" actionLabel={tNav("products")} />
+          )}
+        </Container>
+      </Section>
     </article>
   );
 }

@@ -15,6 +15,16 @@ export function cookiesForScope(all: { name: string; value: string }[], scope: A
   );
 }
 
+export function hasAdminAuthCookie(cookies: { name: string }[]) {
+  return cookies.some((cookie) => cookie.name.startsWith(ADMIN_AUTH_COOKIE));
+}
+
+export function hasShopAuthCookie(cookies: { name: string }[]) {
+  return cookies.some(
+    (cookie) => !cookie.name.startsWith(ADMIN_AUTH_COOKIE) && cookie.name.includes("-auth-token"),
+  );
+}
+
 export function refererPathname(referer: string | null | undefined) {
   if (!referer) return "";
   try {

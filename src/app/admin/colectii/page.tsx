@@ -5,8 +5,10 @@ import { camelList } from "@/lib/supabase/rows";
 import { writeAudit } from "@/server/audit";
 import { revalidatePath } from "next/cache";
 import { Field, Input, Textarea, Button } from "@/components/ui/primitives";
+import { AdminImageField } from "@/components/admin/image-field";
 import { slugify } from "@/lib/slug";
 import { z } from "zod";
+import { resolveFormImage } from "@/services/storage";
 
 type CollectionRow = {
   id: string;
@@ -27,7 +29,6 @@ const schema = z.object({
   name: z.string().min(2).max(160),
   slug: z.string().max(160).optional(),
   description: z.string().max(4000).optional(),
-  imagePath: z.string().max(400).optional(),
   seoTitle: z.string().max(180).optional(),
   seoDescription: z.string().max(300).optional(),
   canonicalUrl: z.string().max(300).optional(),
@@ -55,7 +56,7 @@ export default async function CollectionsAdmin() {
         <ul className="mt-6 space-y-6">
           {rows.map((collection) => (
             <li key={collection.id} className="border border-line bg-card p-4">
-              <form action={saveCollection.bind(null, collection.id)} className="grid gap-3">
+              <form action={saveCollection.bind(null, collection.id)} className="grid gap-3" encType="multipart/form-data">
                 <p className="text-xs uppercase tracking-[0.16em] text-mute">/colectie/{collection.slug}</p>
                 <Field label="Nume">
                   <Input name="name" defaultValue={collection.name} required />
@@ -66,9 +67,7 @@ export default async function CollectionsAdmin() {
                 <Field label="Descriere">
                   <Textarea name="description" defaultValue={collection.description} />
                 </Field>
-                <Field label="Imagine (URL)">
-                  <Input name="imagePath" defaultValue={collection.imagePath ?? ""} />
-                </Field>
+                <AdminImageField current={collection.imagePath} />
                 <Field label="SEO title">
                   <Input name="seoTitle" defaultValue={collection.seoTitle ?? ""} />
                 </Field>
@@ -128,7 +127,7 @@ export default async function CollectionsAdmin() {
       </div>
       <div>
         <h2 className="font-serif text-2xl">Colecție nouă</h2>
-        <form action={createCollection} className="mt-4 grid gap-3">
+        <form action={createCollection} className="mt-4 grid gap-3" encType="multipart/form-data">
           <Field label="Nume">
             <Input name="name" required />
           </Field>
@@ -138,6 +137,7 @@ export default async function CollectionsAdmin() {
           <Field label="Descriere">
             <Textarea name="description" />
           </Field>
+          <AdminImageField />
           <Button type="submit">Creează</Button>
         </form>
       </div>
@@ -150,7 +150,6 @@ function parseCollection(formData: FormData) {
     name: formData.get("name"),
     slug: String(formData.get("slug") ?? ""),
     description: String(formData.get("description") ?? ""),
-    imagePath: String(formData.get("imagePath") ?? ""),
     seoTitle: String(formData.get("seoTitle") ?? ""),
     seoDescription: String(formData.get("seoDescription") ?? ""),
     canonicalUrl: String(formData.get("canonicalUrl") ?? ""),
@@ -172,12 +171,14 @@ async function createCollection(formData: FormData) {
   "use server";
   const actor = await requirePermission("product.write");
   const parsed = parseCollection(formData);
+  const imagePath = await resolveFormImage(formData, { createdBy: actor.id, folder: "collections" });
   const { data, error } = await sb()
     .from("collections")
     .insert({
       name: parsed.name,
       slug: slugify(parsed.slug || parsed.name),
       description: parsed.description ?? "",
+      image_path: imagePath,
       is_active: true,
       type: "manual",
     })
@@ -192,16 +193,17 @@ async function saveCollection(id: string, formData: FormData) {
   "use server";
   const actor = await requirePermission("product.write");
   const parsed = parseCollection(formData);
+  const imagePath = await resolveFormImage(formData, { createdBy: actor.id, folder: "collections" });
   const payload: Record<string, unknown> = {
     name: parsed.name,
     slug: slugify(parsed.slug || parsed.name),
     description: parsed.description ?? "",
     seo_title: parsed.seoTitle || null,
     seo_description: parsed.seoDescription || null,
+    image_path: imagePath,
     is_active: parsed.isActive ?? true,
     updated_at: new Date().toISOString(),
   };
-  if (parsed.imagePath !== undefined) payload.image_path = parsed.imagePath || null;
   if (parsed.canonicalUrl !== undefined) payload.canonical_url = parsed.canonicalUrl || null;
   if (parsed.editorialHtml !== undefined) payload.editorial_html = parsed.editorialHtml ?? "";
   if (parsed.sortOrder !== undefined) payload.sort_order = Number(parsed.sortOrder ?? 0) || 0;

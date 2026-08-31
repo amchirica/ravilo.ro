@@ -3,7 +3,10 @@ import { AdminHeading } from "@/components/admin/admin-heading";
 import { isSupabaseConfigured, sb } from "@/lib/supabase/db";
 import { camelList } from "@/lib/supabase/rows";
 import { Field, Input, Button } from "@/components/ui/primitives";
+import { AdminImageField } from "@/components/admin/image-field";
 import { revalidatePath } from "next/cache";
+import { STOREFRONT_CACHE, revalidateStorefrontTag } from "@/lib/storefront-cache";
+import { resolveFormImage } from "@/services/storage";
 
 type Banner = {
   id: string;
@@ -31,16 +34,14 @@ export default async function BannersAdmin() {
         <ul className="mt-6 space-y-4">
           {rows.map((banner) => (
             <li key={banner.id} className="border border-line bg-card p-4">
-              <form action={saveBanner.bind(null, banner.id)} className="grid gap-3">
+              <form action={saveBanner.bind(null, banner.id)} className="grid gap-3" encType="multipart/form-data">
                 <Field label="Titlu">
                   <Input name="title" defaultValue={banner.title} />
                 </Field>
                 <Field label="Subtitlu">
                   <Input name="subtitle" defaultValue={banner.subtitle} />
                 </Field>
-                <Field label="Imagine">
-                  <Input name="imagePath" defaultValue={banner.imagePath ?? ""} />
-                </Field>
+                <AdminImageField current={banner.imagePath} />
                 <Field label="CTA">
                   <Input name="ctaLabel" defaultValue={banner.ctaLabel} />
                 </Field>
@@ -62,7 +63,7 @@ export default async function BannersAdmin() {
           {rows.length === 0 ? <li className="text-sm text-mute">Niciun banner. Creează unul în dreapta. Dacă tabela lipsește, rulează migrarea 0008.</li> : null}
         </ul>
       </div>
-      <form action={createBanner} className="grid gap-3">
+      <form action={createBanner} className="grid gap-3" encType="multipart/form-data">
         <h2 className="font-serif text-2xl">Banner nou</h2>
         <Field label="Titlu">
           <Input name="title" required />
@@ -70,9 +71,7 @@ export default async function BannersAdmin() {
         <Field label="Placement">
           <Input name="placement" defaultValue="homepage" />
         </Field>
-        <Field label="Imagine">
-          <Input name="imagePath" />
-        </Field>
+        <AdminImageField />
         <Field label="CTA / URL">
           <Input name="ctaLabel" placeholder="Descoperă" />
           <Input name="ctaUrl" placeholder="/produse" />
@@ -85,28 +84,31 @@ export default async function BannersAdmin() {
 
 async function createBanner(formData: FormData) {
   "use server";
-  await requirePermission("content.write");
+  const actor = await requirePermission("content.write");
+  const imagePath = await resolveFormImage(formData, { createdBy: actor.id, folder: "banners" });
   await sb().from("store_banners").insert({
     title: String(formData.get("title") ?? ""),
     placement: String(formData.get("placement") ?? "homepage"),
-    image_path: String(formData.get("imagePath") ?? "") || null,
+    image_path: imagePath,
     cta_label: String(formData.get("ctaLabel") ?? ""),
     cta_url: String(formData.get("ctaUrl") ?? ""),
     is_active: true,
   });
   revalidatePath("/");
   revalidatePath("/admin/bannere");
+  revalidateStorefrontTag(STOREFRONT_CACHE.banners);
 }
 
 async function saveBanner(id: string, formData: FormData) {
   "use server";
-  await requirePermission("content.write");
+  const actor = await requirePermission("content.write");
+  const imagePath = await resolveFormImage(formData, { createdBy: actor.id, folder: "banners" });
   await sb()
     .from("store_banners")
     .update({
       title: String(formData.get("title") ?? ""),
       subtitle: String(formData.get("subtitle") ?? ""),
-      image_path: String(formData.get("imagePath") ?? "") || null,
+      image_path: imagePath,
       cta_label: String(formData.get("ctaLabel") ?? ""),
       cta_url: String(formData.get("ctaUrl") ?? ""),
       placement: String(formData.get("placement") ?? "homepage"),
@@ -116,4 +118,5 @@ async function saveBanner(id: string, formData: FormData) {
     .eq("id", id);
   revalidatePath("/");
   revalidatePath("/admin/bannere");
+  revalidateStorefrontTag(STOREFRONT_CACHE.banners);
 }

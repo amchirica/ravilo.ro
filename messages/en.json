@@ -125,6 +125,7 @@
     "empty": "No products found.",
     "emptyHint": "Try adjusting your filters.",
     "emptyCollection": "There are no products in this collection yet.",
+    "emptyCollectionHint": "This collection is live, but no products are attached yet.",
     "collectionsTitle": "Collections",
     "collectionsIntro": "Edited selections, not shelves.",
     "newTitle": "New in",

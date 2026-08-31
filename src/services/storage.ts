@@ -14,6 +14,8 @@ const EXT_MIME: Record<string, string> = {
   mp4: "video/mp4",
 };
 
+export type StorageBucket = "products" | "cms" | "journal" | "avatars" | "returns";
+
 export function readUploadedFiles(formData: FormData, name = "photos"): File[] {
   const files: File[] = [];
   for (const value of formData.getAll(name)) {
@@ -33,6 +35,37 @@ export function readUploadedFile(formData: FormData, name = "file"): File {
   const files = readUploadedFiles(formData, name);
   if (!files[0]) throw new Error("Alege un fișier.");
   return files[0];
+}
+
+export function tryReadUploadedFile(formData: FormData, name = "file"): File | null {
+  return readUploadedFiles(formData, name)[0] ?? null;
+}
+
+export async function resolveFormImage(
+  formData: FormData,
+  input: {
+    createdBy?: string;
+    bucket?: StorageBucket;
+    folder?: string;
+    current?: string | null;
+    fileField?: string;
+    keepField?: string;
+    removeField?: string;
+  },
+): Promise<string | null> {
+  if (formData.get(input.removeField ?? "imageRemove") === "on") return null;
+  const file = tryReadUploadedFile(formData, input.fileField ?? "image");
+  if (file) {
+    const uploaded = await storeUpload(file, {
+      bucket: input.bucket ?? "cms",
+      folder: input.folder,
+      createdBy: input.createdBy,
+      alt: "",
+    });
+    return uploaded.storagePath;
+  }
+  const keep = String(formData.get(input.keepField ?? "imageKeep") ?? input.current ?? "").trim();
+  return keep || null;
 }
 
 function sniffUploadMime(file: File, buffer: Buffer): string {
@@ -64,8 +97,6 @@ const MAGIC: Record<string, number[][]> = {
   "image/png": [[0x89, 0x50, 0x4e, 0x47]],
   "image/webp": [[0x52, 0x49, 0x46, 0x46]],
 };
-
-export type StorageBucket = "products" | "cms" | "journal" | "avatars" | "returns";
 
 export function assertSafeUpload(file: File, buffer: Buffer) {
   if (!ALLOWED.has(file.type)) throw new Error("Tip de fișier nepermis. Folosește JPEG, PNG, WebP sau AVIF.");

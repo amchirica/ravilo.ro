@@ -4,7 +4,7 @@ import { getActiveHomepageSections, getActiveCategories, getPublishedArticles, l
 import { listPublishedCollections } from "@/services/collections";
 import { listBestsellers } from "@/services/bestsellers";
 import { getStoreSettings } from "@/services/settings";
-import { listPublishedBundles, listPublishedProducts } from "@/services/catalog";
+import { listPublishedBundles, listPublishedProducts, type PublicProduct } from "@/services/catalog";
 import { ProductGrid } from "@/components/storefront/product-grid";
 import { Button, Container, Section, SectionHeader, TextLink } from "@/components/ui/primitives";
 import { formatMoney } from "@/lib/format";
@@ -34,23 +34,29 @@ function ctaLabel(content: Record<string, unknown>, key: string, fallback: strin
   return String((content[key] as { label?: string } | undefined)?.label ?? fallback);
 }
 
+const emptyProducts = { items: [] as PublicProduct[] };
+
 export default async function HomePage() {
   const locale = (await getLocale()) as AppLocale;
   const t = await getTranslations();
-  const [rawSections, settings, categories, featured, picks, news, popular, collections, banners, articles, guides, bundles, storeReviews] = await Promise.all([
+  const [rawSections, settings, categories] = await Promise.all([
     getActiveHomepageSections(),
     getStoreSettings(),
     getActiveCategories(locale),
-    listPublishedProducts({ featured: true, take: 8, locale }),
-    listPublishedProducts({ raviloPick: true, take: 8, locale }),
-    listPublishedProducts({ isNew: true, take: 8, locale }),
-    listBestsellers(locale, 8),
-    listPublishedCollections(locale, true),
-    getActiveBanners("homepage"),
-    getPublishedArticles(3, locale, "ARTICLE"),
-    getPublishedArticles(3, locale, "GUIDE"),
-    listPublishedBundles(locale),
-    listApprovedStoreReviews(6),
+  ]);
+  const types = new Set(rawSections.map((section) => section.type));
+  const fallbackHome = rawSections.length === 0;
+  const [featured, picks, news, popular, collections, banners, articles, guides, bundles, storeReviews] = await Promise.all([
+    types.has("FEATURED_PRODUCTS") || fallbackHome ? listPublishedProducts({ featured: true, take: 8, locale }) : emptyProducts,
+    types.has("RAVILO_PICKS") ? listPublishedProducts({ raviloPick: true, take: 8, locale }) : emptyProducts,
+    types.has("NEW_ARRIVALS") ? listPublishedProducts({ isNew: true, take: 8, locale }) : emptyProducts,
+    types.has("BESTSELLERS") ? listBestsellers(locale, 8) : [],
+    types.has("COLLECTION") ? listPublishedCollections(locale, true) : [],
+    fallbackHome ? [] : getActiveBanners("homepage"),
+    types.has("JOURNAL") ? getPublishedArticles(3, locale, "ARTICLE") : [],
+    types.has("GUIDES") ? getPublishedArticles(3, locale, "GUIDE") : [],
+    types.has("BUNDLE") ? listPublishedBundles(locale) : [],
+    types.has("REVIEWS") ? listApprovedStoreReviews(6) : [],
   ]);
   const sections = rawSections.map((section) => localizeHomepageSection(section, locale));
 
@@ -188,7 +194,7 @@ export default async function HomePage() {
                 <SectionHeader title={section.title} subtitle={section.subtitle} />
                 <div className="grid gap-px bg-line md:grid-cols-3">
                   {items.map((item) => (
-                    <Link key={item.href} href={item.href} className="bg-paper px-6 py-12 transition-colors duration-200 hover:bg-surface">
+                    <Link prefetch={false} key={item.href} href={item.href} className="bg-paper px-6 py-12 transition-colors duration-200 hover:bg-surface">
                       <span className="text-xl tracking-[-0.03em] md:text-2xl">{item.title}</span>
                     </Link>
                   ))}
@@ -357,7 +363,7 @@ export default async function HomePage() {
                 <ul className="grid gap-10 md:grid-cols-3">
                   {collections.map((collection) => (
                     <li key={collection.id}>
-                      <Link href={`/colectie/${collection.slug}`} className="group block">
+                      <Link prefetch={false} href={`/colectie/${collection.slug}`} className="group block">
                         <h3 className="text-xl tracking-[-0.03em] transition-colors duration-200 group-hover:text-mute">
                           {collection.name}
                         </h3>
@@ -438,6 +444,7 @@ function CategoryStrip({
         <div className="grid grid-cols-2 gap-px bg-line md:grid-cols-4">
           {categories.map((category) => (
             <Link
+              prefetch={false}
               key={category.id}
               href={`/categorie/${category.slug}`}
               className="bg-paper px-5 py-12 text-lg tracking-[-0.03em] transition-colors duration-200 hover:bg-surface md:py-16"
@@ -462,7 +469,7 @@ function ArticleRow({
   return (
     <div className="grid gap-10 md:grid-cols-3">
       {articles.map((article) => (
-        <Link key={article.id} href={`${base}/${article.slug}`} className="group block">
+        <Link prefetch={false} key={article.id} href={`${base}/${article.slug}`} className="group block">
           <h3 className="text-xl tracking-[-0.03em] transition-colors duration-200 group-hover:text-mute">{article.title}</h3>
           <p className="mt-3 text-sm leading-relaxed text-mute">{article.excerpt}</p>
         </Link>

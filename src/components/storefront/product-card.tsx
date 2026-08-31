@@ -17,7 +17,7 @@ export async function ProductCard({ product }: { product: PublicProduct }) {
   return (
     <article className="group flex flex-col">
       <div className="relative overflow-hidden bg-surface">
-        <Link href={`/produs/${product.slug}`} className="block">
+        <Link prefetch={false} href={`/produs/${product.slug}`} className="block">
           <div className="relative aspect-[4/5]">
             {image ? (
               <StoreImage
@@ -55,7 +55,7 @@ export async function ProductCard({ product }: { product: PublicProduct }) {
       </div>
       <div className="mt-4 space-y-1">
         {product.category ? <p className="text-[0.6875rem] uppercase tracking-[0.14em] text-mute">{product.category.name}</p> : null}
-        <Link href={`/produs/${product.slug}`} className="block text-[0.9375rem] leading-snug tracking-[-0.02em]">
+        <Link prefetch={false} href={`/produs/${product.slug}`} className="block text-[0.9375rem] leading-snug tracking-[-0.02em]">
           {product.name}
         </Link>
         <p className="text-sm text-ink/80">

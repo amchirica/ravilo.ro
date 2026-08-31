@@ -34,13 +34,13 @@ export function Button({
       href.startsWith("http") || href.startsWith("/admin") || href.startsWith("/api") || href.startsWith("mailto:");
     if (adminOrExternal) {
       return (
-        <NextLink href={href} className={styles}>
+        <NextLink href={href} prefetch={false} className={styles}>
           {children}
         </NextLink>
       );
     }
     return (
-      <LocaleLink href={href} className={styles}>
+      <LocaleLink href={href} prefetch={false} className={styles}>
         {children}
       </LocaleLink>
     );
@@ -175,6 +175,7 @@ export function TextLink({
   return (
     <LocaleLink
       href={href}
+      prefetch={false}
       className={cn(
         "text-[0.6875rem] uppercase tracking-[0.16em] text-mute transition-colors duration-200 hover:text-ink",
         className,
@@ -214,7 +215,7 @@ export function Breadcrumb({ items }: { items: { href?: string; label: string }[
           <li key={`${item.label}-${index}`} className="flex items-center gap-2">
             {index > 0 ? <span aria-hidden>/</span> : null}
             {item.href ? (
-              <LocaleLink href={item.href} className="hover:text-ink">
+              <LocaleLink href={item.href} prefetch={false} className="hover:text-ink">
                 {item.label}
               </LocaleLink>
             ) : (

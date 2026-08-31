@@ -50,6 +50,7 @@ export function MobileNav({ items, label }: { items: NavItem[]; label: string })
                 <li key={item.id}>
                   <Link
                     href={item.url || "/"}
+                    prefetch={false}
                     className="block py-3.5 text-2xl tracking-[-0.03em] text-ink"
                     onClick={() => setOpen(false)}
                   >

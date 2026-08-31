@@ -1,9 +1,11 @@
 import "server-only";
+import { cache } from "react";
 import { isSupabaseConfigured, sb } from "@/lib/supabase/db";
 import { camelKeys, camelList } from "@/lib/supabase/rows";
 import { sanitizeCmsHtml } from "@/lib/sanitize";
 import { pickLocalized, type AppLocale } from "@/lib/i18n";
 import { requestLocale } from "@/lib/request-locale";
+import { STOREFRONT_CACHE, isolateMemo } from "@/lib/storefront-cache";
 
 type NavItem = {
   id: string;
@@ -43,7 +45,7 @@ async function loc(explicit?: AppLocale): Promise<AppLocale> {
   return explicit ?? requestLocale();
 }
 
-export async function getActiveHomepageSections() {
+async function loadActiveHomepageSections() {
   if (!isSupabaseConfigured()) return [];
   const now = new Date();
   const { data } = await sb()
@@ -55,6 +57,10 @@ export async function getActiveHomepageSections() {
     (row) => (!row.publishAt || row.publishAt <= now) && (!row.unpublishAt || row.unpublishAt >= now),
   );
 }
+
+export const getActiveHomepageSections = cache(() =>
+  isolateMemo(STOREFRONT_CACHE.homepage, loadActiveHomepageSections),
+);
 
 export function localizeHomepageSection(section: HomepageSection, locale: AppLocale) {
   const content = locale === "en" && section.contentEn ? section.contentEn : section.content;
@@ -76,7 +82,7 @@ export async function getNavigation(location: "HEADER" | "MOBILE" | "FOOTER") {
     .sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
-export async function getActiveBanners(placement?: string) {
+async function loadActiveBanners(placement: string) {
   if (!isSupabaseConfigured()) return [];
   const now = new Date();
   const { data, error } = await sb().from("store_banners").select("*").eq("is_active", true).order("sort_order", { ascending: true });
@@ -99,7 +105,11 @@ export async function getActiveBanners(placement?: string) {
   });
 }
 
-export async function getActiveAnnouncement() {
+export const getActiveBanners = cache((placement?: string) =>
+  isolateMemo(`${STOREFRONT_CACHE.banners}:${placement ?? ""}`, () => loadActiveBanners(placement ?? "")),
+);
+
+async function loadActiveAnnouncement() {
   if (!isSupabaseConfigured()) return null;
   const now = new Date();
   const { data } = await sb()
@@ -113,6 +123,8 @@ export async function getActiveAnnouncement() {
     ) ?? null
   );
 }
+
+export const getActiveAnnouncement = cache(() => isolateMemo(STOREFRONT_CACHE.announcement, loadActiveAnnouncement));
 
 export async function getPublishedPage(slug: string, locale?: AppLocale) {
   if (!isSupabaseConfigured()) return null;
@@ -247,9 +259,8 @@ export async function getPublishedArticle(slug: string, locale?: AppLocale, expe
   };
 }
 
-export async function getActiveCategories(locale?: AppLocale) {
+async function loadActiveCategories(language: AppLocale) {
   if (!isSupabaseConfigured()) return [];
-  const language = await loc(locale);
   const { data } = await sb()
     .from("categories")
     .select("*")
@@ -272,6 +283,11 @@ export async function getActiveCategories(locale?: AppLocale) {
     heroImage: category.heroImage,
   }));
 }
+
+export const getActiveCategories = cache(async (locale?: AppLocale) => {
+  const language = await loc(locale);
+  return isolateMemo(`${STOREFRONT_CACHE.categories}:${language}`, () => loadActiveCategories(language));
+});
 
 export async function getCategoryBySlug(slug: string, locale?: AppLocale) {
   if (!isSupabaseConfigured()) return null;

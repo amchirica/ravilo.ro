@@ -29,7 +29,7 @@ export function HeaderNav({
               onMouseEnter={() => setOpen(true)}
               onMouseLeave={() => setOpen(false)}
             >
-              <Link href="/produse" className="text-[0.8125rem] tracking-[0.04em] text-ink/80 transition-colors hover:text-ink">
+              <Link prefetch={false} href="/produse" className="text-[0.8125rem] tracking-[0.04em] text-ink/80 transition-colors hover:text-ink">
                 {item.label}
               </Link>
               {open ? (
@@ -38,13 +38,13 @@ export function HeaderNav({
                   <ul className="mt-5 grid grid-cols-2 gap-x-8 gap-y-2">
                     {categories.map((category) => (
                       <li key={category.id}>
-                        <Link href={`/categorie/${category.slug}`} className="block py-1.5 text-sm text-ink/80 hover:text-ink">
+                        <Link prefetch={false} href={`/categorie/${category.slug}`} className="block py-1.5 text-sm text-ink/80 hover:text-ink">
                           {category.name}
                         </Link>
                       </li>
                     ))}
                   </ul>
-                  <Link href="/produse" className="mt-6 inline-block text-sm underline-offset-4 hover:underline">
+                  <Link prefetch={false} href="/produse" className="mt-6 inline-block text-sm underline-offset-4 hover:underline">
                     {item.label}
                   </Link>
                 </div>
@@ -56,6 +56,7 @@ export function HeaderNav({
           <Link
             key={item.id}
             href={item.url || "/"}
+            prefetch={false}
             className="text-[0.8125rem] tracking-[0.04em] text-ink/80 transition-colors hover:text-ink"
           >
             {item.label}

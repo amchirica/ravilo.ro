@@ -125,6 +125,7 @@
     "empty": "Nu am găsit produse.",
     "emptyHint": "Încearcă să schimbi filtrele.",
     "emptyCollection": "Nu există încă produse în această colecție.",
+    "emptyCollectionHint": "Colecția este publicată, dar nu are încă produse atașate.",
     "collectionsTitle": "Colecții",
     "collectionsIntro": "Selecții alese, nu rafturi.",
     "newTitle": "Noutăți",
