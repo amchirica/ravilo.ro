@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 import createNextIntlPlugin from "next-intl/plugin";
 import dns from "node:dns";
 
@@ -82,5 +83,4 @@ const nextConfig: NextConfig = {
 
 export default withNextIntl(nextConfig);
 
-import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 initOpenNextCloudflareForDev();

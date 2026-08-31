@@ -1,4 +1,7 @@
 {
+  // Workers Builds: set Build to `npx @opennextjs/cloudflare build`
+  // and Deploy to `npx @opennextjs/cloudflare deploy`.
+  // `npm run build` + `npx wrangler deploy` cannot deploy this Next.js app.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ravilo-ro",
   "main": ".open-next/worker.js",
@@ -13,5 +16,8 @@
       "binding": "WORKER_SELF_REFERENCE",
       "service": "ravilo-ro"
     }
-  ]
+  ],
+  "images": {
+    "binding": "IMAGES"
+  }
 }
