@@ -1,8 +1,11 @@
 import { requirePermission } from "@/server/auth/session";
 import { listRows, sb } from "@/lib/supabase/db";
 import { formatRon } from "@/lib/money";
+import { formatDate } from "@/lib/format";
+import { orderStatusLabel, paymentStatusLabel } from "@/lib/order-status";
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { AppLocale } from "@/lib/i18n";
 
 type OrderRow = {
   id: string;
@@ -11,6 +14,7 @@ type OrderRow = {
   status: string;
   paymentStatus: string;
   grandTotal: number;
+  createdAt?: string;
 };
 
 export default async function AdminOrders({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
@@ -22,7 +26,7 @@ export default async function AdminOrders({ searchParams }: { searchParams: Prom
     const safe = query.replace(/[%_,]/g, " ").slice(0, 80);
     const { data } = await sb()
       .from("orders")
-      .select("id, public_order_number, email, status, payment_status, grand_total")
+      .select("id, public_order_number, email, status, payment_status, grand_total, created_at")
       .or(`public_order_number.ilike.%${safe}%,email.ilike.%${safe}%,phone.ilike.%${safe}%`)
       .order("created_at", { ascending: false })
       .limit(80);
@@ -33,11 +37,13 @@ export default async function AdminOrders({ searchParams }: { searchParams: Prom
       status: row.status,
       paymentStatus: row.payment_status,
       grandTotal: row.grand_total,
+      createdAt: row.created_at,
     }));
   } else {
     rows = await listRows<OrderRow>("orders", { order: "created_at", ascending: false, limit: 80 });
   }
   const t = await getTranslations("admin");
+  const locale = (await getLocale()) as AppLocale;
   return (
     <div>
       <h1 className="font-serif text-4xl">{t("orders")}</h1>
@@ -63,8 +69,13 @@ export default async function AdminOrders({ searchParams }: { searchParams: Prom
                 </Link>
               </td>
               <td>{order.email}</td>
-              <td>{order.status}</td>
-              <td>{order.paymentStatus}</td>
+              <td>
+                {orderStatusLabel(order.status, locale)}
+                {order.createdAt ? (
+                  <span className="mt-0.5 block text-xs text-mute">{formatDate(order.createdAt, locale)}</span>
+                ) : null}
+              </td>
+              <td>{paymentStatusLabel(order.paymentStatus, locale)}</td>
               <td>{formatRon(order.grandTotal)}</td>
             </tr>
           ))}

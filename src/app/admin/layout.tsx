@@ -75,7 +75,12 @@ const NAV: { titleKey: string; items: NavLink[] }[] = [
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const pathname = (await headers()).get("x-ravilo-pathname") ?? "";
+  const headerList = await headers();
+  const pathname =
+    headerList.get("x-ravilo-pathname") ||
+    headerList.get("x-invoke-path") ||
+    headerList.get("next-url") ||
+    "";
   if (isPublicAdminPath(pathname)) {
     return <AdminIntlProvider>{children}</AdminIntlProvider>;
   }

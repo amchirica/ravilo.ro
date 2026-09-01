@@ -1,4 +1,5 @@
 import "server-only";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { isSupabasePublicConfigured } from "@/lib/supabase/db";
 import { camelKeys } from "@/lib/supabase/rows";
@@ -63,8 +64,11 @@ export async function getAdminUser() {
 
 export async function requireUser(): Promise<SessionUser> {
   const user = await getAdminUser();
-  if (!user) redirect("/admin/login");
-  return user;
+  if (!user) {
+    const path = (await headers()).get("x-ravilo-pathname") || "/admin";
+    redirect(`/admin/login?next=${encodeURIComponent(path)}`);
+  }
+  return user as SessionUser;
 }
 
 export async function requirePermission(permission: Permission): Promise<SessionUser> {

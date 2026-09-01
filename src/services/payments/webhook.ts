@@ -5,6 +5,7 @@ import { getPaymentAdapter } from "@/services/payments";
 import { PaymentError, type NormalizedWebhookEvent, type PaymentProviderKey } from "@/services/payments/types";
 import { convertReservationToSale } from "@/services/inventory";
 import { enqueueEmail } from "@/services/email";
+import { recordOrderStatusChange } from "@/services/order-status";
 import { writeAudit } from "@/server/audit";
 import { logger } from "@/lib/logger";
 
@@ -162,10 +163,10 @@ export async function handlePaymentWebhook(rawBody: string, signature: string | 
       updated_at: new Date().toISOString(),
     })
     .eq("id", payment.orderId);
-  await sb().from("order_status_history").insert({
-    order_id: payment.orderId,
-    from: payment.order.status,
-    to: "PAID",
+  await recordOrderStatusChange({
+    orderId: payment.orderId,
+    fromStatus: payment.order.status,
+    toStatus: "PAID",
     note: "webhook",
   });
   try {

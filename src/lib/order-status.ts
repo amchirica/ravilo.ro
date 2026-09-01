@@ -40,3 +40,16 @@ export function orderStatusLabel(value: string, locale: AppLocale) {
 export function paymentStatusLabel(value: string, locale: AppLocale) {
   return label(PAYMENT, value, locale);
 }
+
+const ACTIONS: Record<string, { ro: string; en: string }> = {
+  PROCESSING: { ro: "Pregătește comanda", en: "Start preparing" },
+  READY_TO_SHIP: { ro: "Gata de expediere", en: "Ready to ship" },
+  SHIPPED: { ro: "Marchează expediată", en: "Mark shipped" },
+  DELIVERED: { ro: "Marchează livrată", en: "Mark delivered" },
+  CANCELLED: { ro: "Anulează comanda", en: "Cancel order" },
+  PAID: { ro: "Marchează plătită", en: "Mark paid" },
+};
+
+export function orderActionLabel(value: string, locale: AppLocale) {
+  return label(ACTIONS, value, locale);
+}

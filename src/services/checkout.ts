@@ -15,6 +15,7 @@ import { InventoryError, defaultLocationId, releaseReservationsForOrder, reserve
 import { getPaymentAdapter } from "@/services/payments";
 import { stripeLineItemsFromQuote, stripeLinesTotal } from "@/services/payments/stripe-line-items";
 import { enqueueEmail } from "@/services/email";
+import { recordOrderStatusChange } from "@/services/order-status";
 import { getEnv } from "@/lib/env";
 import { checkoutHoldSeconds } from "@/lib/checkout-hold";
 import { getLocale } from "next-intl/server";
@@ -132,9 +133,9 @@ export async function createCheckout(input: unknown) {
   );
   if (itemsError) throw new CheckoutError(itemsError.message);
 
-  await sb().from("order_status_history").insert({
-    order_id: created.id,
-    to: "PENDING_PAYMENT",
+  await recordOrderStatusChange({
+    orderId: created.id,
+    toStatus: "PENDING_PAYMENT",
     note: "checkout",
   });
 

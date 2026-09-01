@@ -11,3 +11,10 @@ export function formatDate(value: Date | string | null | undefined, locale: AppL
   if (Number.isNaN(date.getTime())) return "";
   return new Intl.DateTimeFormat(intlLocale(locale), { dateStyle: "medium" }).format(date);
 }
+
+export function formatDateTime(value: Date | string | null | undefined, locale: AppLocale): string {
+  if (!value) return "";
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat(intlLocale(locale), { dateStyle: "medium", timeStyle: "short" }).format(date);
+}

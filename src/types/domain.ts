@@ -76,19 +76,26 @@ export type HomepageSectionType = (typeof HOMEPAGE_SECTION_TYPES)[number];
 
 export const ALLOWED_ORDER_TRANSITIONS: Record<OrderStatus, readonly OrderStatus[]> = {
   DRAFT: ["PENDING_PAYMENT", "CANCELLED"],
-  PENDING_PAYMENT: ["PAID", "CANCELLED", "FAILED" as OrderStatus].filter(Boolean) as OrderStatus[],
+  PENDING_PAYMENT: ["PAID", "CANCELLED"],
   PAID: ["PROCESSING", "CANCELLED", "REFUNDED", "PARTIALLY_REFUNDED"],
   PROCESSING: ["READY_TO_SHIP", "SHIPPED", "CANCELLED", "REFUNDED"],
   READY_TO_SHIP: ["SHIPPED", "CANCELLED"],
-  SHIPPED: ["DELIVERED", "RETURNED" as OrderStatus].filter(Boolean) as OrderStatus[],
+  SHIPPED: ["DELIVERED"],
   DELIVERED: ["REFUNDED", "PARTIALLY_REFUNDED"],
   CANCELLED: [],
   REFUNDED: [],
   PARTIALLY_REFUNDED: ["REFUNDED"],
 };
 
+const OPERATOR_SKIP = new Set<OrderStatus>(["REFUNDED", "PARTIALLY_REFUNDED", "PAID"]);
+
 export function canTransitionOrder(from: OrderStatus, to: OrderStatus, override = false): boolean {
   if (override) return true;
   if (from === to) return true;
   return (ALLOWED_ORDER_TRANSITIONS[from] ?? []).includes(to);
+}
+
+/** Next statuses an operator can apply from the order desk (payment/refunds have their own flows). */
+export function nextFulfillmentStatuses(from: OrderStatus): OrderStatus[] {
+  return (ALLOWED_ORDER_TRANSITIONS[from] ?? []).filter((status) => !OPERATOR_SKIP.has(status));
 }
