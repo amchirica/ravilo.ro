@@ -38,6 +38,7 @@ const NAV: { titleKey: string; items: NavLink[] }[] = [
     titleKey: "contentGroup",
     items: [
       { href: "/admin/continut/homepage", labelKey: "homepage", permission: "content.read" },
+      { href: "/admin/continut/navigatie", labelKey: "navigation", permission: "content.read" },
       { href: "/admin/continut/blog", labelKey: "journal", permission: "content.read" },
       { href: "/admin/continut/blog-categorii", labelKey: "journalCategories", permission: "content.read" },
       { href: "/admin/continut/ghiduri", labelKey: "guides", permission: "content.read" },

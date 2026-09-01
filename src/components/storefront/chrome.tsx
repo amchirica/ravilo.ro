@@ -1,7 +1,7 @@
 import { Link } from "@/i18n/routing";
 import { User, Heart, ShoppingBag } from "lucide-react";
 import { Container } from "@/components/ui/primitives";
-import { getActiveAnnouncement, getActiveCategories } from "@/services/cms";
+import { getActiveAnnouncement, getActiveCategories, getNavigation } from "@/services/cms";
 import { getStoreSettings } from "@/services/settings";
 import { getLocale, getTranslations } from "next-intl/server";
 import { pickLocalized, type AppLocale } from "@/lib/i18n";
@@ -41,6 +41,15 @@ export async function StoreHeader() {
     { id: "ghiduri", url: "/ghiduri", label: t("guides") },
     { id: "jurnal", url: "/blog", label: t("journal") },
   ];
+  const cmsNav = await getNavigation("HEADER");
+  const headerItems =
+    cmsNav.length > 0
+      ? cmsNav.map((item) => ({
+          id: item.id,
+          url: item.url || "/",
+          label: pickLocalized(item.label, item.labelEn, locale),
+        }))
+      : navItems;
   const barClass =
     settings.announcementStyle === "line" ? "border-b border-line bg-surface text-ink" : "bg-band text-band-fg";
   const announcementBar = announcementText ? (
@@ -61,10 +70,10 @@ export async function StoreHeader() {
     <StickyHeader announcement={announcementBar}>
       <Container className="relative flex h-[var(--header-h)] items-center justify-between gap-2 sm:gap-4">
         <div className="flex min-w-0 items-center gap-0.5">
-          <MobileNav items={navItems} label={t("openMenu")} />
+          <MobileNav items={headerItems} label={t("openMenu")} />
           <BrandLogo href="/" height={32} className="max-w-[8.5rem] sm:max-w-none" priority />
         </div>
-        <HeaderNav items={navItems} categories={categories} productsLabel={t("products")} />
+        <HeaderNav items={headerItems} categories={categories} productsLabel={t("products")} />
         <div className="flex shrink-0 items-center">
           <div className="hidden items-center lg:flex">
             <Suspense>

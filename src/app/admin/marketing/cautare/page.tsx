@@ -3,6 +3,7 @@ import { AdminHeading } from "@/components/admin/admin-heading";
 import { isSupabaseConfigured, sb } from "@/lib/supabase/db";
 import { camelList } from "@/lib/supabase/rows";
 import { Field, Input, Button } from "@/components/ui/primitives";
+import { ConfirmForm } from "@/components/admin/confirm-form";
 import { revalidatePath } from "next/cache";
 
 export default async function SearchMerchAdmin() {
@@ -23,8 +24,13 @@ export default async function SearchMerchAdmin() {
       <h2 className="mt-8 font-serif text-2xl">Sinonime</h2>
       <ul className="mt-3 text-sm">
         {synonyms.map((row) => (
-          <li key={row.id}>
-            {row.term} = {row.synonym}
+          <li key={row.id} className="flex justify-between gap-3">
+            <span>
+              {row.term} = {row.synonym}
+            </span>
+            <ConfirmForm action={deleteRow.bind(null, "search_synonyms", row.id)} message="Ștergi sinonimul?">
+              <button className="text-xs text-danger underline">Șterge</button>
+            </ConfirmForm>
           </li>
         ))}
         {synonyms.length === 0 ? <li className="text-mute">Niciun sinonim.</li> : null}
@@ -41,8 +47,13 @@ export default async function SearchMerchAdmin() {
       <h2 className="mt-10 font-serif text-2xl">Boost-uri</h2>
       <ul className="mt-3 text-sm">
         {boosts.map((row) => (
-          <li key={row.id}>
-            “{row.query}” → {row.targetType} /{row.targetSlug}
+          <li key={row.id} className="flex justify-between gap-3">
+            <span>
+              “{row.query}” → {row.targetType} /{row.targetSlug}
+            </span>
+            <ConfirmForm action={deleteRow.bind(null, "search_boosts", row.id)} message="Ștergi boost-ul?">
+              <button className="text-xs text-danger underline">Șterge</button>
+            </ConfirmForm>
           </li>
         ))}
         {boosts.length === 0 ? <li className="text-mute">Niciun boost.</li> : null}
@@ -62,8 +73,13 @@ export default async function SearchMerchAdmin() {
       <h2 className="mt-10 font-serif text-2xl">Rezultate promovate</h2>
       <ul className="mt-3 text-sm">
         {promotions.map((row) => (
-          <li key={row.id}>
-            “{row.query}” → produs {row.productId}
+          <li key={row.id} className="flex justify-between gap-3">
+            <span>
+              “{row.query}” → produs {row.productId}
+            </span>
+            <ConfirmForm action={deleteRow.bind(null, "search_promotions", row.id)} message="Ștergi promovarea?">
+              <button className="text-xs text-danger underline">Șterge</button>
+            </ConfirmForm>
           </li>
         ))}
         {promotions.length === 0 ? <li className="text-mute">Niciun rezultat promovat.</li> : null}
@@ -110,5 +126,12 @@ async function addPromotion(formData: FormData) {
     product_id: String(formData.get("productId") ?? "").trim(),
     sort_order: 0,
   });
+  revalidatePath("/admin/marketing/cautare");
+}
+
+async function deleteRow(table: "search_synonyms" | "search_boosts" | "search_promotions", id: string) {
+  "use server";
+  await requirePermission("content.write");
+  await sb().from(table).delete().eq("id", id);
   revalidatePath("/admin/marketing/cautare");
 }

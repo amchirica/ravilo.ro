@@ -10,6 +10,7 @@ import { AdminImageField } from "@/components/admin/image-field";
 import { slugify } from "@/lib/slug";
 import { z } from "zod";
 import { resolveFormImage } from "@/services/storage";
+import { ConfirmForm } from "@/components/admin/confirm-form";
 
 type CategoryRow = {
   id: string;
@@ -102,9 +103,12 @@ export default async function CategoriesAdmin() {
                   </Button>
                 </div>
               </form>
-              <form action={deleteCategory.bind(null, category.id)} className="mt-2">
-                <button className="text-xs text-mute underline">Șterge</button>
-              </form>
+              <ConfirmForm
+                action={deleteCategory.bind(null, category.id)}
+                message="Ștergi categoria? Produsele din ea rămân în magazin, fără categorie."
+              >
+                <button className="text-xs text-danger underline">Șterge</button>
+              </ConfirmForm>
             </li>
           ))}
         </ul>

@@ -6,6 +6,7 @@ import { getStoreSettings } from "@/services/settings";
 import { Field, Input, Button } from "@/components/ui/primitives";
 import { writeAudit } from "@/server/audit";
 import { revalidatePath } from "next/cache";
+import { ConfirmForm } from "@/components/admin/confirm-form";
 import Link from "next/link";
 
 type Method = {
@@ -58,6 +59,9 @@ export default async function ShippingAdmin() {
               </label>
               <Button type="submit">Salvează metoda</Button>
             </form>
+            <ConfirmForm action={deleteMethod.bind(null, method.id)} message="Ștergi metoda de livrare?">
+              <button className="mt-2 text-xs text-danger underline">Șterge metoda</button>
+            </ConfirmForm>
           </li>
         ))}
       </ul>
@@ -94,6 +98,16 @@ async function saveMethod(id: string, formData: FormData) {
     })
     .eq("id", id);
   await writeAudit({ actorUserId: actor.id, action: "shipping.update", entityType: "ShippingMethod", entityId: id });
+  revalidatePath("/admin/livrare");
+  revalidatePath("/checkout");
+}
+
+async function deleteMethod(id: string) {
+  "use server";
+  const actor = await requirePermission("shipping.write");
+  const { error } = await sb().from("shipping_methods").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  await writeAudit({ actorUserId: actor.id, action: "shipping.delete", entityType: "ShippingMethod", entityId: id });
   revalidatePath("/admin/livrare");
   revalidatePath("/checkout");
 }

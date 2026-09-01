@@ -9,6 +9,7 @@ import { AdminImageField } from "@/components/admin/image-field";
 import { slugify } from "@/lib/slug";
 import { z } from "zod";
 import { resolveFormImage } from "@/services/storage";
+import { ConfirmForm } from "@/components/admin/confirm-form";
 
 type CollectionRow = {
   id: string;
@@ -118,9 +119,12 @@ export default async function CollectionsAdmin() {
                   );
                 })}
               </ul>
-              <form action={deleteCollection.bind(null, collection.id)} className="mt-3">
-                <button className="text-xs text-mute underline">Arhivează / șterge</button>
-              </form>
+              <ConfirmForm
+                action={deleteCollection.bind(null, collection.id)}
+                message="Ștergi definitiv colecția? Produsele rămân în magazin, dar ies din această selecție."
+              >
+                <button className="text-xs text-danger underline">Șterge colecția</button>
+              </ConfirmForm>
             </li>
           ))}
         </ul>
@@ -233,7 +237,8 @@ async function removeProduct(collectionId: string, productId: string) {
 async function deleteCollection(id: string) {
   "use server";
   const actor = await requirePermission("product.write");
-  await sb().from("collections").update({ is_active: false, updated_at: new Date().toISOString() }).eq("id", id);
-  await writeAudit({ actorUserId: actor.id, action: "collection.archive", entityType: "Collection", entityId: id });
+  const { error } = await sb().from("collections").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  await writeAudit({ actorUserId: actor.id, action: "collection.delete", entityType: "Collection", entityId: id });
   revalidateCollections();
 }

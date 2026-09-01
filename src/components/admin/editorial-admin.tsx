@@ -10,6 +10,7 @@ import { slugify } from "@/lib/slug";
 import { resolveFormImage } from "@/services/storage";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { ConfirmForm } from "@/components/admin/confirm-form";
 
 type ArticleRow = {
   id: string;
@@ -185,9 +186,9 @@ export async function EditorialAdmin({ kind }: { kind: "ARTICLE" | "GUIDE" }) {
               /{kind === "GUIDE" ? "ghiduri" : "blog"}/{article.slug}
             </p>
             <ArticleForm kind={kind} article={article} products={products} shopLinks={shopLinks} selected={selected.get(article.id) ?? []} saveLabel={t("update")} />
-            <form action={deleteArticle.bind(null, article.id)} className="mt-3">
+            <ConfirmForm action={deleteArticle.bind(null, article.id)} message="Ștergi articolul definitiv?">
               <button className="text-sm text-danger underline">{t("delete")}</button>
-            </form>
+            </ConfirmForm>
           </li>
         ))}
       </ul>

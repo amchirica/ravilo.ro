@@ -12,6 +12,7 @@ import { translationMissing } from "@/lib/i18n";
 import { resolveFormImage } from "@/services/storage";
 import { HOMEPAGE_SECTION_TYPES, type HomepageSectionType } from "@/types/domain";
 import { homepageSectionLabel } from "@/lib/homepage-section-labels";
+import { ConfirmForm } from "@/components/admin/confirm-form";
 
 type Section = {
   id: string;
@@ -117,9 +118,9 @@ export default async function HomepageAdmin() {
                   <form action={toggleSection.bind(null, section.id, !section.isEnabled)}>
                     <button className="text-sm underline">{section.isEnabled ? "Dezactivează" : "Activează"}</button>
                   </form>
-                  <form action={deleteSection.bind(null, section.id)}>
-                    <button className="text-sm text-mute underline">Șterge</button>
-                  </form>
+                  <ConfirmForm action={deleteSection.bind(null, section.id)} message="Ștergi secțiunea de pe homepage?">
+                    <button className="text-sm text-danger underline">Șterge</button>
+                  </ConfirmForm>
                 </div>
               </div>
               <form action={saveSection.bind(null, section.id)} className="mt-4 grid gap-3 md:grid-cols-2" encType="multipart/form-data">

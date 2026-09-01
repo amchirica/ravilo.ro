@@ -9,6 +9,8 @@ import { sanitizeCmsHtml } from "@/lib/sanitize";
 import { slugify } from "@/lib/slug";
 import { resolveFormImage } from "@/services/storage";
 import Link from "next/link";
+import { writeAudit } from "@/server/audit";
+import { ConfirmForm } from "@/components/admin/confirm-form";
 
 type PageRow = {
   id: string;
@@ -68,6 +70,18 @@ async function savePage(formData: FormData) {
   revalidatePath(`/en/${payload.slug}`);
 }
 
+async function deletePage(id: string, slug: string) {
+  "use server";
+  const actor = await requirePermission("content.write");
+  const { error } = await sb().from("pages").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  await writeAudit({ actorUserId: actor.id, action: "page.delete", entityType: "Page", entityId: id });
+  revalidatePath("/");
+  revalidatePath("/admin/continut/pagini");
+  revalidatePath(`/${slug}`);
+  revalidatePath(`/en/${slug}`);
+}
+
 export default async function PagesAdmin() {
   await requirePermission("content.write");
   const rows = await listRows<PageRow>("pages", { order: "slug" });
@@ -88,6 +102,9 @@ export default async function PagesAdmin() {
           <li key={page.id} className="border border-line p-4">
             /{page.slug} · {page.title} · {page.status}
             <PageForm page={page} />
+            <ConfirmForm action={deletePage.bind(null, page.id, page.slug)} message="Ștergi pagina din magazin?">
+              <button className="mt-3 text-xs text-danger underline">Șterge pagina</button>
+            </ConfirmForm>
           </li>
         ))}
       </ul>

@@ -13,6 +13,7 @@ import { setVariantStock } from "@/services/inventory";
 import { slugify } from "@/lib/slug";
 import { revalidatePath } from "next/cache";
 import { productConstraintCode, productSaveMessage } from "@/lib/product-save";
+import { ConfirmForm } from "@/components/admin/confirm-form";
 import { z } from "zod";
 
 const schema = z.object({
@@ -357,6 +358,14 @@ export default async function EditProductPage({
             Arhivează
           </Button>
         </form>
+        <ConfirmForm
+          action={deleteProduct.bind(null, product.id)}
+          message="Ștergi definitiv produsul? Dispare din magazin, coșuri și colecții. Comenzile rămân ca snapshot."
+        >
+          <Button type="submit" variant="danger">
+            Șterge produsul
+          </Button>
+        </ConfirmForm>
       </div>
     </div>
   );
@@ -573,4 +582,25 @@ async function archiveProduct(id: string) {
   await writeAudit({ actorUserId: actor.id, action: "product.archive", entityType: "Product", entityId: id });
   revalidatePath("/produse");
   redirect(`/admin/produse/${id}`);
+}
+
+async function deleteProduct(id: string) {
+  "use server";
+  const actor = await requirePermission("product.write");
+  const { data: variants } = await sb().from("product_variants").select("id").eq("product_id", id);
+  const variantIds = (variants ?? []).map((row) => row.id);
+  if (variantIds.length) {
+    await sb().from("cart_items").delete().in("variant_id", variantIds);
+    await sb().from("inventory_transactions").delete().in("variant_id", variantIds);
+  }
+  const { error } = await sb().from("products").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  await writeAudit({ actorUserId: actor.id, action: "product.delete", entityType: "Product", entityId: id });
+  revalidatePath("/produse");
+  revalidatePath("/");
+  revalidatePath("/noutati");
+  revalidatePath("/best-sellers");
+  revalidatePath("/categorii");
+  revalidatePath("/admin/produse");
+  redirect("/admin/produse");
 }
